@@ -1,0 +1,64 @@
+ccollections
+defaultdict
+p0
+(c__builtin__
+list
+p1
+tp2
+Rp3
+S'City'
+p4
+(lp5
+S'LOS ANGELES'
+p6
+aS'LOS ANGELES'
+p7
+aS'LOS ANGELES'
+p8
+aS'Los Angeles'
+p9
+aS'LOS ANGELES'
+p10
+asS'StreetAddress'
+p11
+(lp12
+S'441 BAUCHET ST'
+p13
+aS'1711 W TEMPLE ST'
+p14
+aS'1450 SAN PABLO ST'
+p15
+aS'443 So. Soto St'
+p16
+aS'1233 N LA BREA AVE'
+p17
+asS'State'
+p18
+(lp19
+S'CA'
+p20
+aS'CA'
+p21
+aS'CA'
+p22
+aS'CA'
+p23
+aS'CA'
+p24
+asS'UniqueID'
+p25
+(lp26
+I1
+aI2
+aI3
+aI4
+aI5
+asS'Zip'
+p27
+(lp28
+I90012
+aI90026
+aI90033
+aI90033
+aI90036
+as.
