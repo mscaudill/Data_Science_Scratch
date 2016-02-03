@@ -1,5 +1,6 @@
-# In this module, we will explore using application programming interfaces (APIs). Many websites provide APIs which allow you to explicitly request data in a structured format. Since HTTP protocol is for transferring text only, the data you request through a web API must be serialized into a string format. This serialization often uses JavaScript Object Notation (json). These objects look very similar to Python Dicts (except they are strings). We can parse json objects using pythons json module.
-
+"""
+In this module, we will explore using application programming interfaces (APIs). Many websites provide APIs which allow you to explicitly request data in a structured format. Since HTTP protocol is for transferring text only, the data you request through a web API must be serialized into a string format. This serialization often uses JavaScript Object Notation (json). These objects look very similar to Python Dicts (except they are strings). We can parse json objects using pythons json module.
+"""
 # Simple json deserialization ex
 import requests
 import json
