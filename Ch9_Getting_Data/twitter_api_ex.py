@@ -1,7 +1,8 @@
 """
 Twitter API code example
 
-This program demonstrates how to use the twython library to interact with the twitter API. Specifically we will be getting a sample of all (1000) of the latest tweets
+This program demonstrates how to use the twython library to interact with
+the twitter API.
 
 """
 
@@ -15,7 +16,7 @@ class MyStreamer(TwythonStreamer):
     speecifying how to interact with the stream"""
 
     def on_success(self,data):
-        """ What to do when we get tweets, here data will be a python dict
+        """ What to do when we get tweets, data will be a python dict
         representing a tweet"""
     
         # only want english tweets, not all tweets contain language so check

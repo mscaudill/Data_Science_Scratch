@@ -1,4 +1,11 @@
-# In this example we are going to get to get data concerning data science books published on the Oreilly website. This is an example of webscraping using the beautiful soup library.
+"""
+oreilly_books_webscraper.py
+
+This is an example of how to perform a webscrape of a website. We take the
+Oreilly publishers website as an example and scrape all books related to
+data science. We extract the book publication year and plot
+
+"""
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -13,22 +20,24 @@ base_url = 'http://shop.oreilly.com/category/browse-subjects/' + \
 # call beautiful soup to get the url text and use the html5lib parser
 #soup = BeautifulSoup(requests.get(base_url).text, 'html5lib')
 
-# In looking at the HTML source code, you can see that each of the videos and books starts with one thumbtext tag element <td class="thumbtext">
+# In looking at the HTML source code, each of the videos and books starts
+# with one thumbtext tag element <td class="thumbtext">
 
-# lets start by getting the number of these spans and printing the total number. Note Each td is all the code between thumbtext so we can further filter to precise elements to follow
+# start by getting the number of these spans and printing the total number. 
 #tds = soup('td', 'thumbtext')
 #print len(tds)
 
-# Now lets filter out the videos. Notice that following <span class='pricelabel'> preceeds video,ebook, or print options so we can write a function to find the videos to filter them out
+# Now lets filter out the videos. Note that following <span
+# class='pricelabel'> preceeds an ebook, video or book. so we filter
 def is_video(td):
-    "it's a video if it has exactly one pricelabel and if text starts with Video"""
+    "it's a video if one price label and starts with Video"
     pricelabel = td('span', 'pricelabel')
-    return (len(pricelabel) == 1 and pricelabel[0].text.strip().startswith('Video'))
+    return (len(pricelabel) == 1 and 
+            pricelabel[0].text.strip().startswith('Video'))
 
 #print len([td for td in tds if not is_video(td)])
 
 # We are now ready to start pulling data out of each of the td elements. 
-# Notice the following: (1) the title is inside the a tag inside the <div class='thumbheader"> we can get it with td.find("div", 'thumbheader').a.text. (2) the author name can be obtained with td.find('div','AuthorName').text but we need to strip off the 'By' and seperate authors on ',' (3) The isbn is also in the thumbheader but we will have to use regex to extract it (4) the date is in the <span class = 'directorydate' we will gather each of thes pieces in a function.
 
 def book_info(td):
     """ given a beautiful soup td tag representing a book, extract the book's details and return in a dict"""
@@ -44,12 +53,12 @@ def book_info(td):
     isbn = re.match('/product/(.*)\.do', isbn_link).groups()[0]
     date = td.find('span', 'directorydate').text.strip()
 
-    return { 'title' : title, 'authors': authors, 'isbn' : isbn, 'date':date}
+    return {'title' : title, 'authors': authors, 'isbn' : isbn, 'date':date}
 
 # now we are ready to scrape
 books = []
 
-# There are a total of 42 pages, we update the page number by adding the number to the end of the url
+# There are a total of 42 pages for data science related books
 num_pages = 42
 
 for page_num in range(1,num_pages + 1):
@@ -67,7 +76,8 @@ for page_num in range(1,num_pages + 1):
     # to obey the robots.txt file we must wait 30s between request
     sleep(30)
 
-# Now that we have a list of data books with info on each, we can plot the number of data science books published in each year
+# Now that we have a list of data books with info on each,
+# we can plot the number of data science books published in each year
 
 def get_book_year(book):
     """ returns the year in which the book was published"""
