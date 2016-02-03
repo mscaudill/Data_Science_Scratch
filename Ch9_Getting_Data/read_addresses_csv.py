@@ -1,4 +1,10 @@
-# This script reads the addresses_csv file (a list of addresses). The file has comma separated fields and header information. We save the data to a dictionary and then play around with saving the dictionary for later use
+"""
+read_addresses_csv.py
+
+reads the addresses from a comma separated file with header. Saves the
+address to a dictionary. 
+
+"""
 
 import sys
 import csv

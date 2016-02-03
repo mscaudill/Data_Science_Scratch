@@ -1,4 +1,9 @@
-""" In this module we will create a set of tools for doing some basic linear    algebra. It is important to remember that using list for vector algebra     is good for exposition but it incurs serious performance issues. You sho    uld always opt for using the NUMPY library which has a packages for comp    uting each of the vector operations we define below. Nonetheless the boo    k uses these so I will use them """
+"""
+In this module we will create a set of tools for doing basic linear
+algebra. It is important to remember that these tools are for teaching only
+In non-toy situations you should opt fot the NUMPY library for array and
+matrix operations since it has been optimized
+"""
 
 import math
 
@@ -26,13 +31,13 @@ def vector_sum(vectors):
 # Scalar Multiply
 ############################################################################
 def scalar_multiply(c,vector):
-    """ returns the scalar multiplication of c (float) with a vector """
+    """ returns the scalar multiple of c (float) with a vector """
     return [c * x for x in vector]
 
 ############################################################################# Vector mean
 ############################################################################
 def vector_mean(vectors):
-    """ computes a vector where each element x is a mean of all the x elemen        ts of vectors """
+    """ computes a mean vector from a set of vectors"""
     n = len(vectors)
     return scalar_multiply(1/n, vector_sum(vectors))
 
@@ -67,7 +72,7 @@ def squared_distance(v,w):
 # distance
 ############################################################################
 def distance(v,w):
-    """ returns the magnitude of the squared distance between v and w """
+    """ returns the magnitude of squared distance between v and w """
     return magnitude(squared_distance(v,w))
 
 

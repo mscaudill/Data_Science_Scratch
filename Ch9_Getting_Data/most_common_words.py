@@ -1,4 +1,9 @@
-# Here we create a simple script for counting the most common words in a text file. There is likely easier command line versions of this but I'll do it here for practice.
+"""
+most_common_words.py
+
+An example of how to read in a text file and extract some simple info
+
+"""
 
 import sys
 from collections import Counter
@@ -10,7 +15,10 @@ except:
     print "usage: most_common_words.py num_words"
     sys.exit(1) # any non-zero exit code indicates error
 
-# We first lower case all words, (2) strip leading and trailing spaces and (3) split on the white spaces (4) count only if a word
+# We first lower case all words, 
+#(2) strip leading and trailing spaces and 
+#(3) split on the white spaces 
+#(4) count only if a word
 counter = Counter(word.lower() for line in sys.stdin 
                   for word in line.strip().split() 
                   if word)

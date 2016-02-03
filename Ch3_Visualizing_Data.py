@@ -1,4 +1,7 @@
-# This module contains the basics of plotting data with python.
+"""
+This module provides examples of basic plotting with matplotlib libraries
+"""
+
 
 # Perform imports of needed modules
 from matplotlib import pyplot as plt
@@ -41,7 +44,8 @@ plt.figure(2)
 plt.bar([x-4 for x in histogram.keys()],histogram.values(),8)
 
 # Set the plot axis
-plt.axis([round(min(grades))-5,round(max(grades))+5, 0, max(histogram.values())])
+plt.axis([round(min(grades))-5,round(max(grades))+5, 0,
+          max(histogram.values())])
 
 # plot x ticks
 plt.xticks([10*i for i in range(11)]) # grades go from 0:100
@@ -84,8 +88,8 @@ plt.figure(4)
 plt.scatter(friends, minutes)
 # now label each point
 for label, friend_count, minute_count in zip(labels, friends, minutes):
-    plt.annotate(label, xy = (friend_count, minute_count), xytext = (5,-5),
-        textcoords='offset points')
+    plt.annotate(label, xy = (friend_count, minute_count), 
+                 xytext = (5,-5), textcoords='offset points')
 plt.xlabel('# friends')
 plt.ylabel('Minutes spent at website/day')
 plt.title('Minutes at site vs. number of friends')
