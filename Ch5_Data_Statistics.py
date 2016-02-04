@@ -1,5 +1,7 @@
-""" In this module we will examine a data set that is taken from a binomial distribution and calculate important statistics about the data. We will check these values against the theoretical values."""
-
+"""
+In this module we will look at a sample data set generated from a binomial
+distribution and look at some statistics that describe the data
+"""
 from numpy import random
 from matplotlib import pyplot as plt
 from collections import Counter
@@ -10,7 +12,11 @@ import math
 ############################################################################
 # Create binomially distributed data
 ############################################################################
-""" Recall that the binomial distribution follows P_x(k) = (n choose k)*p^k*(1-p)^n-k. The experiment here is to flip a coin n times and ask what is the probability of getting k successes given that each flip has a probability of p for a heads"""
+"""
+The binomial distribution follows P_x(k) = (n choose K)*p^k*(1-p)^(n-k). The
+thought exp is flipping a coin n times and asking what is the probability of
+k successes where each flip has probability p for heads
+"""
 n = 1000 # 1000 bernouilli trials
 p = 0.25 # probability of heads for a given trial
 size = n # draw out the same number of samples as their are trials
@@ -34,8 +40,11 @@ plt.bar(xs,ys)
 ############################################################################
 # Mean
 ############################################################################
-"""The first statistic we will look at is the mean. For a binomial distribution we can calculate the mean directly. Recall that a binomial is made up of n bernouilli trials each with probability p so by linearity of expectation E[x_k] for binomial is E[ x_1 + x_2 +...] = E[x_1]+... = np"""
-
+"""
+The first statistic is the mean. For a binomial the mean can be calculated
+because the binomial is a sum of indpt bernoulli trials and by linearity of
+Expectation E[ x1+x2+x3+...] = E[x1]+E[x2]+.... = np since each has prob=p
+"""
 def mean(x):
     """ returns the sample mean of x """
     return sum(x)/float(len(x))
@@ -68,7 +77,10 @@ print "The median value is %f" %(median(successes))
 ############################################################################
 # Quantile
 ############################################################################
-""" The quantile represents the data point below which a certain percentage f the data lies. For example the median is the pt where 50 % of the data lies below"""
+"""
+The quantile is the data point below which a certain percentage of the data
+lies. Ex. the median is the data pt where 50% of the data lies below
+"""
 
 def quantile(x):
     """ returns the pth-percentile value in x """
@@ -89,7 +101,11 @@ def data_range(x):
 ############################################################################
 # Variance
 ############################################################################
-""" Variance is a measure of how spread out the data is relative to the mean E[(X-E[x])^2] and we usually approx this by 1/n sum_k((x_k-xbar)^2 but this is a biased estimator so we raplace n by n-1 to make it unbiased"""
+"""
+Variance is a measure of how spread out the data is relative to the mean
+E[(X-E[X])^2]. We approx this by 1/n*sum_k((x_k-xbar)^2). But this is biased
+so we change 1/n to 1/n-1 to give an unbiased estimator of variance
+"""
 # de-mean
 def demean(x):
     """ translates x by subtracting its mean """
@@ -105,11 +121,15 @@ def standard_deviation(x):
     """ Computes the standard deviation of x """
     std = math.sqrt(variance(x))
     return std
-print "The standard deviation in the number of heads is %f" %(standard_deviation(successes))
+print "The standard deviation in the number of heads is %f" 
+        %(standard_deviation(successes))
 
 ############################################################################# Covariance and Correlation
 ############################################################################
-""" Covariance measures how two random variables X & Y vary togehter. It is defined as E[(x-E[x])(y-E[y]). As usual we approximate this sum((x_k-x_bar)*(y_k-y_bar))/(n-1)"""
+""" Covariance measures how two random variables X & Y vary togehter. 
+It is defined as E[(x-E[x])(y-E[y]). As usual we approximate this 
+sum((x_k-x_bar)*(y_k-y_bar))/(n-1)
+"""
 
 def covariance(x,y):
     n = len(x)

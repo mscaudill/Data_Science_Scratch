@@ -1,4 +1,7 @@
-""" Here we explore  conditional probability, Bayes Thm, some distributions and the central limit theorem"""
+"""
+In this module we explore conditional probabiility, various distributions,
+Bayes them and the centeral limit them
+"""
 import numpy as np
 from matplotlib import pyplot as plt
 import math
@@ -6,8 +9,11 @@ from collections import Counter
 
 ############################################################################# Conditional Probability
 ############################################################################
-# We start by thinking of the common example of the probability of getting a# girl within a 2 child set knowing that at least one of them is a girl. The 
-# answer we have worked out in Probability stattistics and random processes # book long ago is 1/3. Lets show this computationally
+"""We start by thinking of the common example of the probability of getting 
+girl within a 2 child set knowing that at least one of them is a girl. The 
+answer we have worked out in Probability stattistics and random processes 
+ book long ago is 1/3. Lets show this computationally"""
+
 def random_kid():
     """ a function to randomly choose boy or girl for many families"""
     return np.random.choice(["boy","girl"])
@@ -86,9 +92,15 @@ plt.title("Various Normal CDFs")
 ############################################################################
 # Binary search algorithm for inverse cdf
 ############################################################################
-# Recall that the normal CDF gives the probability that an observation Z of # a random variable is < z. What we want to do is to approximate the inverse of this function. This will be helpful for determing quantities like significane. Most of the time you can use builtin functions like ppf (perrcent point function). Here we write our own routine for practice.
+"""Recall that the normal CDF gives the probability that an observation Z o
+a random variable is < z. What we want to do is to approximate the inverse 
+of this function. This will be helpful for determing quantities like
+significane. Most of the time you can use builtin functions like ppf 
+(perrcent point function). Here we write our own routine for practice."""
+
 def inverse_normal_cdf(p ,mu=0 ,sigma=1, tolerance =0.0001):
-    """ Finds the inverse of the normal cdf given a probability p, mean, std    and tolerance using a binary search algorithm """
+    """ Finds the inverse of the normal cdf given a probability p, mean, 
+        stand tolerance using a binary search algorithm """
     # if not standard, compute standard variables and rescale
     if mu != 0 or sigma != 1:
         return  mu + sigma*inverse_normal_cdf(p, tolerance=tolerance)
@@ -102,7 +114,8 @@ def inverse_normal_cdf(p ,mu=0 ,sigma=1, tolerance =0.0001):
         mid_z = (high_z + low_z)/float(2)
         # for this new z value calculate the CDF
         mid_p = normal_cdf(mid_z)
-        # if the new mid_p value is below the supplied p then increase low_z        # and low_p to mid_z and mid_p
+        # if the new mid_p value is below the supplied p then increase 
+        #low_z and low_p to mid_z and mid_p
         if mid_p < p:
             low_z, low_p = mid_z, mid_p
         # else if the new mid_p is larger than supplied p reduce hi_z and
