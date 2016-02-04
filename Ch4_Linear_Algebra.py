@@ -21,7 +21,8 @@ def vector_subtract(v,w):
     """ returns the vector subtraction of list v and w """
     return[x-y for x,y in zip(v,w)]
 
-############################################################################# Vector sum
+###########################################################################
+# Vector sum
 ############################################################################
 def vector_sum(vectors):
     """ returns the vector sum of arbitrary number of vectors """
@@ -34,7 +35,8 @@ def scalar_multiply(c,vector):
     """ returns the scalar multiple of c (float) with a vector """
     return [c * x for x in vector]
 
-############################################################################# Vector mean
+###########################################################################
+# Vector mean
 ############################################################################
 def vector_mean(vectors):
     """ computes a mean vector from a set of vectors"""
@@ -79,7 +81,9 @@ def distance(v,w):
 ############################################################################
 # Matrix operations
 ############################################################################
-# A matrix using list is represented as list of list A = [[1,2,3],[4,5,6]]. So each inner list is a row of the matrix and the number of elements in each inner list is the number of matrix columns.
+"""A matrix using list is represented as list of list A = [[1,2,3],[4,5,6]].
+So each inner list is a row of the matrix and the number of elements in each
+inner list is the number of matrix columns."""
 
 ############################################################################
 # matrix shape
@@ -111,7 +115,8 @@ def get_col(A,j):
 # make matrix
 ############################################################################
 def make_matrix(num_rows,num_cols,entry_fn):
-    """ makes a matrix of num_rows x num_cols whose values are given by entr        y fn """
+    """ makes a matrix of num_rows x num_cols whose values are given by 
+        entry fn """
     return [[entry_fn(i,j) for j in range(num_cols)] for i in 
             range(num_rows)]
 

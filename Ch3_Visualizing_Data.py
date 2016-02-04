@@ -53,7 +53,8 @@ plt.xlabel('Decile')
 plt.ylabel('# Students')
 plt.title ('Grade Distribution')
 
-############################################################################# Multiple Line Charts
+###########################################################################
+# Multiple Line Charts
 ############################################################################# Here we demonstrate how to construct line charts with multiple plots
 # make some fake data to plot
 variance = [2**i for i in range(1,10)]
