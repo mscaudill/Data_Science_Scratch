@@ -1,4 +1,8 @@
-# In this module we will look at the method of gradient descent. It is useful for things like MLE and MAP parameter estimation where we need to maximize some target function. Note that here again we will use a long-hand form for computing gradients etc but scipy has builtin methods which are much more computationally effecient.
+""" In this module we will look at the method of gradient descent. It is 
+useful for things like MLE and MAP parameter estimation where we need to 
+maximize some target function. Note that here again we will use a 
+long-hand form for computing gradients etc but scipy has builtin methods 
+which are much more computationally effecient."""
 
 import math
 import random
@@ -11,12 +15,15 @@ from Ch4_Linear_Algebra import vector_subtract, scalar_multiply
 ##############################
 # Create target func to minimize
 ##############################
-# Lets set up a target function to minimize we will make it a vector function meaning it takes a vector of inputs and returns a single value
+"""Lets set up a target function to minimize we will make it a vector 
+function meaning it takes a vector of inputs and returns a single value"""
 def sum_of_squares(v):
     """ computes the sum of the squared elements in v """
     return sum([v_i**2 for v_i in v])
 
-# make a plot of this function. This is an aside but I want to play around with numpy and matplotlib some more.
+# make a plot of this function. This is an aside but I want to play around 
+#with numpy and matplotlib some more.
+
 #array of x values
 xs = np.linspace(-10,10,100)
 ys = np.linspace(-10,10,100)
@@ -31,7 +38,11 @@ ax.plot_surface(xx, yy, zs, cmap = cm.jet)
 ##############################
 # Estimate Gradient
 ##############################
-# To estimate the gradient we will compute the partial difference quotient. Recall that for f(x) the derivative can be estimated as (f(x+h)-f(x))/h. This is the difference quotient. Like-wise the partial difference quotient is 
+"""To estimate the gradient we will compute the partial difference quotient
+Recall that for f(x) the derivative can be estimated as (f(x+h)-f(x))/h. 
+This is the difference quotient. Like-wise the partial difference quotient 
+is"""
+
 def partial_difference_quotient(f, v, i, h):
     """ Computes the ith partial difference quotient of f at v"""
     # create a new vec w where h has been added to only the ith component
@@ -39,18 +50,26 @@ def partial_difference_quotient(f, v, i, h):
     # now return the difference quotient    
     return (f(w)-f(v)) / h
 
-# now we can estimate the gradientby calling partial difference quotient on each ith component of v
+# now we can estimate the gradientby calling partial difference quotient 
+#on each ith component of v
 def estimate_gradient(f,v,h=.0001):
     return [partial_difference_quotient(f, v, i, h) for i,_ in enumerate(v)]
 
-# Note the above has the major drawback in that if you have n dims in v you need to eval f on 2*n points and if you need to estimate the gradient multiple times you are calculating f at values that are far from the gradient many times over.
+"""Note the above has the major drawback in that if you have n dims in v you
+need to eval f on 2*n points and if you need to estimate the gradient 
+multiple times you are calculating f at values that are far from the 
+gradient many times over."""
 
 ##############################
 # Minimization/Maximization
 ##############################
-# now that we can estimate the gradient of any function lets go back to our sum of squares ex z=x^2+y^2 and locate the minimum of this function. We could use our gradient estimate above but as we mentioned this is expensive so lets use the known gradient [2x, 2y]
+"""now that we can estimate the gradient of any function lets go back to our
+sum of squares ex z=x^2+y^2 and locate the minimum of this function. We 
+could use our gradient estimate above but as we mentioned this is expensive 
+so lets use the known gradient [2x, 2y]"""
 
-# We need to be able to move a step from current location v in a given direction with a certain stepsize
+# We need to be able to move a step from current location v in a given 
+#direction with a certain stepsize
 
 def step(v, direction, step_size):
     """ move a step_size direction from v """
@@ -81,7 +100,8 @@ while True:
     iteration_number += 1
 
 minimum_z = sum_of_squares(v)
-print "[x,y]= [%.5f, %.5f] yields a minimum z of %.5f in %d iterations" %(v[0],v[1], minimum_z, iteration_number)
+print "[x,y]= [%.5f, %.5f] yields a minimum z of %.5f in %d iterations" 
+        %(v[0],v[1], minimum_z, iteration_number)
 
 # A potential problem here is how do we know what step size to choose? One way to do this is to provide a list of step sizes and test each one. However it is possible that some step size will result in invalid inputs for our function so we create a safe apply function.
 def safe(f):

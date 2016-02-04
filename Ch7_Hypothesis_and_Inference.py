@@ -87,7 +87,8 @@ lo,hi = normal_two_sided_bounds(0.95,mu_0,sigma_0)
 # actual mu sigma based on p=0.55
 mu_1, sigma_1 = normal_approx_of_binomial(1000,0.55)
 
-#type II error means we accept null when it is false. This occurs when z is withhin our null H0 interval even though it is false
+# type II error means we accept null when it is false. This occurs when z is
+# withhin our null H0 interval even though it is false
 type_II_probability = normal_probability_between(lo, hi, mu_1, sigma_1)
 # The power is 1 - typeIIProbability
 power = 1-type_II_probability
@@ -151,7 +152,8 @@ def a_b_test_statistic(N_a, n_a, N_b, n_b):
     p_a, sigma_a = estimated_parameters(N_a, n_a)
     p_b, sigma_b = estimated_parameters(N_b, n_b)
     return (p_b-p_a) / math.sqrt(sigma_a**2 + sigma_b**2) # ~ std normal
-# Lets say for example A gets 200 clicks and B gets 180 clicks out of 1000. The statistic would be:
+# Lets say for example A gets 200 clicks and B gets 180 clicks out of 1000.
+#The statistic would be:
 z = a_b_test_statistic(1000, 200, 1000, 180)
 print "The A/B Statistic is %f" %(z)
 
