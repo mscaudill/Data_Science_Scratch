@@ -103,9 +103,13 @@ minimum_z = sum_of_squares(v)
 print "[x,y]= [%.5f, %.5f] yields a minimum z of %.5f in %d iterations" 
         %(v[0],v[1], minimum_z, iteration_number)
 
-# A potential problem here is how do we know what step size to choose? One way to do this is to provide a list of step sizes and test each one. However it is possible that some step size will result in invalid inputs for our function so we create a safe apply function.
+"""A potential problem here is how do we know what step size to choose? One 
+way to do this is to provide a list of step sizes and test each one. However
+it is possible that some step size will result in invalid inputs for our 
+function so we create a safe apply function."""
 def safe(f):
-    """ return a new function the same as f but returns infinity when f prod    uces and error"""
+    """ return a new function the same as f but returns infinity when f 
+        produces and error"""
     def safe_f(*args, **kwargs):
         try:
             return f(*args,**kwargs)
@@ -116,7 +120,10 @@ def safe(f):
 ##############################
 # General gradient descent
 ##############################
-# In the general case, we have some target function that we would like to minimze and its gradient function and a set of starting parameters theta_0. Here is the general implementation of the gradient descent.
+"""In the general case, we have some target function that we would like to 
+minimze and its gradient function and a set of starting parameters theta_0. 
+Here is the general implementation of the gradient descent."""
+
 def minimize_batch(target_fn, gradient_fn, theta_0, tolerance = 0.00001):
     """ use gradient to find theta that minimizes target func """
     # set a variable step size, we'll locate the optimal
@@ -146,7 +153,8 @@ def minimize_batch(target_fn, gradient_fn, theta_0, tolerance = 0.00001):
         else:
         theta, value = next_theta, next_value
 
-# We also need a way to compute maximums of target_fn we will do this by minimizing the negative of f
+# We also need a way to compute maximums of target_fn we will do this by 
+# minimizing the negative of f
 def negate(f):
     """ return a function that for any input x returns -f(x)"""
     return lambda *args, **kwargs: -f(*args, **kwargs)
@@ -161,12 +169,24 @@ def maximize_batch(target_fn, gradient_fn, theta_0, tolerance = 0.000001):
                           theta_0,
                           tolerance)
                             
-# the function above is called minimize_BATCH because our update rule was theta := theta_old - step_size*grad(f(theta_old)) and we did this for n iterations which meansfor n iterations we have theta_min ~= theta_olds - step_size*sum(grad(f(theta(i)))) where i runs from 1 to n observations or iterations. In fact it is even worse because we used multiple step sizes for example for 10 step sizes this sum(gradients) would have been carried out 10X more. So this method is very slow. To summarize **"We don't want to compute the gradient of target_fn (also called obj. funct) on all the theas (also called training set) that brings us to the minimum theta. So we explore stochastic gradient descent next
+"""the function above is called minimize_BATCH because our update rule was 
+theta := theta_old - step_size*grad(f(theta_old)) and we did this for n 
+iterations which meansfor n iterations we have 
+theta_min ~= theta_olds - step_size*sum(grad(f(theta(i)))) where i runs from
+1 to n observations or iterations. In fact it is even worse because we used 
+multiple step sizes for example for 10 step sizes this sum(gradients) would 
+have been carried out 10X more. So this method is very slow. To summarize **
+"We don't want to compute the gradient of target_fn (also called obj. funct)
+on all the theas (also called training set) that brings us to the minimum th
+eta. So we explore stochastic gradient descent next"""
 
 ##############################
 # Stochastic gradient descent
 ##############################
-# In SGD, we will choose an initial vector of parameters theta_0 and a step_size/learning rate eta. Then repeat the following (1) randomly shuffle data in the training set (2) for i=1,..n do theta := theta - eta*gradient(target_fn)
+"""In SGD, we will choose an initial vector of parameters theta_0 and a 
+step_size/learning rate eta. Then repeat the following (1) randomly shuffle 
+data in the training set (2) for i=1,..n do 
+theta := theta - eta*gradient(target_fn)"""
 
 def in_random_order(data):
     """generator that returns the elements of data in random order"""
@@ -177,7 +197,8 @@ def in_random_order(data):
     for i in indexes:
         yield data[i]
 
-def minimize_stochastic(target_fn, gradient_fn, x, y, theta_0, eta_0 = 0.01):
+def minimize_stochastic(target_fn, gradient_fn, x, y, 
+                        theta_0, eta_0 = 0.01):
     data = zip(x,y)
     theta = theta_0
     eta = eta_0
@@ -198,7 +219,8 @@ def minimize_stochastic(target_fn, gradient_fn, x, y, theta_0, eta_0 = 0.01):
             min_theta, min_value = theta, value
             eta = eta_0
         else:
-            # we are not improving so shrink the step size and increment iteration
+            # we are not improving so shrink the step size and 
+            # increment iteration
             iterations_with_no_improvement += 1
             eta *= 0.9
 
