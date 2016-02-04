@@ -7,7 +7,8 @@ from matplotlib import pyplot as plt
 import math
 from collections import Counter
 
-############################################################################# Conditional Probability
+###########################################################################
+# Conditional Probability
 ############################################################################
 """We start by thinking of the common example of the probability of getting 
 girl within a 2 child set knowing that at least one of them is a girl. The 
@@ -60,7 +61,11 @@ def uniform_cdf(x):
 ############################################################################
 # Normal Distribution
 ############################################################################
-# The normal distribution is the 'king' distribution. The reason is the CLT. The CLT says that given a set of i.i.d. random vars. *from any distribution* the standard value Z = (X_bar-mu)/(sigma/sqrt(n)) converges in distribution to the standard normal distribution for large n
+"""The normal distribution is the 'king' distribution. The reason is the 
+CLT. The CLT says that given a set of i.i.d. random vars. *from any 
+distribution* the standard value Z = (X_bar-mu)/(sigma/sqrt(n)) converges 
+in distribution to the standard normal distribution for large n"""
+
 def normal_pdf(x,mu=0,sigma=1):
     """ The pdf of the normal distribution with mean mu and std sigma"""
     root_two_pi = math.sqrt(2*math.pi)
@@ -131,8 +136,14 @@ print "The z value for probability 0.75 is %f" %(inverse_normal_cdf(0.95))
 ############################################################################
 # Central limit Thm
 ############################################################################
-# As we have learned from probability theory if we have a large collection 
-# of random variables X_i then the standard variable Z = (X_bar-mu)/(sigma/sqrt(n)) will converge in distribution to a standard normal distribution. For example lets say we have many bernouilli trials with E[X] = p and var(X)= p(1-p). The sum of the iid variables is a binomial Y(n,p) and Z = (Y(n,p)-np)/sqrt(np(1-p)) is approx normal. So the distribution converges to a normal distribution with mean np and var = np(1-p)
+"""As we have learned from probability theory if we have a large collection 
+of random variables X_i then the standard variable 
+Z = (X_bar-mu)/(sigma/sqrt(n)) will converge in distribution to a standard 
+normal distribution. For example lets say we have many bernouilli trials 
+with E[X] = p and var(X)= p(1-p). The sum of the iid variables is a 
+binomial Y(n,p) and Z = (Y(n,p)-np)/sqrt(np(1-p)) is approx normal. So the 
+distribution converges to a normal distribution with mean np and 
+var = np(1-p)"""
 
 def bernoulli_trial(p):
     """ Performs a single bernoulli trial with success p """
