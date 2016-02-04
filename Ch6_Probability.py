@@ -81,7 +81,11 @@ plt.plot(xs,[normal_pdf(x,mu=-1) for x in xs],'-.',label='mu=-1, sigma=1')
 plt.legend()
 plt.title('Various Normal PDFs')
 
-# The CDF of the standard normal distribution is important because we can use it to calculate thresholds (p-values), confidence intervals etc to understand how well we may be estimating model parameters such as mu or sigma etc...
+"""The CDF of the standard normal distribution is important because we can 
+use it to calculate thresholds (p-values), confidence intervals etc to 
+understand how well we may be estimating model parameters such as mu or 
+sigma etc..."""
+
 def normal_cdf(x, mu=0, sigma=1):
     """ Constructs the nomal cumulative distribution function """
     return(1+math.erf((x-mu)/(math.sqrt(2)*sigma)))/2
@@ -157,7 +161,8 @@ def binomial(n,p):
 # approaches a normal distribution with mean np and std = sqrt(np(1-p))
 # lets plot to see that this is the case
 def make_hist(p, n, num_points):
-    """ makes a histogram of binomial data and normal data to show the truth    of the central limit theorem"""
+    """ makes a histogram of binomial data and normal data to show the 
+        truth of the central limit theorem"""
     data = [binomial(n,p) for _ in range(num_points)]
     # use a bar chart to show the distribution of bin(n,p)
     histogram = Counter(data)

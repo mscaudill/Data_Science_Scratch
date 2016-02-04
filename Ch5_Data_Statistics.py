@@ -124,7 +124,8 @@ def standard_deviation(x):
 print "The standard deviation in the number of heads is %f" 
         %(standard_deviation(successes))
 
-############################################################################# Covariance and Correlation
+###########################################################################
+# Covariance and Correlation
 ############################################################################
 """ Covariance measures how two random variables X & Y vary togehter. 
 It is defined as E[(x-E[x])(y-E[y]). As usual we approximate this 
