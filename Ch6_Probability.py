@@ -182,6 +182,4 @@ def make_hist(p, n, num_points):
     plt.title("Binomial Distribution vs. Normal Approximation")
 
 make_hist(0.75,100,1000)
-# Only show these plots if being called as main
-if __name__ == "__main__":
-    plt.show()
+plt.show()
