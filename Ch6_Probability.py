@@ -38,8 +38,6 @@ for _ in range(10000):
         either_girl += 1
 
 # print out the probabilities
-print "P(both|older): ", both_girls / float(older_girl)
-print "P(both|either): ", both_girls / float(either_girl)
 
 ############################################################################
 # Uniform distribution
@@ -72,14 +70,6 @@ def normal_pdf(x,mu=0,sigma=1):
     return 1/(root_two_pi*sigma)*math.exp(-(x-mu)**2/(2*sigma**2))
 
 # Lets make a few plots
-xs = [x/10.0 for x in range(-50,50)]
-plt.figure(1)
-plt.plot(xs,[normal_pdf(x,sigma=1) for x in xs],'-',label='mu=0, sigma=1')
-plt.plot(xs,[normal_pdf(x,sigma=2) for x in xs],'--',label='mu=0, sigma=2')
-plt.plot(xs,[normal_pdf(x,sigma=.5) for x in xs],':',label='mu=0,sigma=.5')
-plt.plot(xs,[normal_pdf(x,mu=-1) for x in xs],'-.',label='mu=-1, sigma=1')
-plt.legend()
-plt.title('Various Normal PDFs')
 
 """The CDF of the standard normal distribution is important because we can 
 use it to calculate thresholds (p-values), confidence intervals etc to 
@@ -89,14 +79,8 @@ sigma etc..."""
 def normal_cdf(x, mu=0, sigma=1):
     """ Constructs the nomal cumulative distribution function """
     return(1+math.erf((x-mu)/(math.sqrt(2)*sigma)))/2
-xs = [x/10.0 for x in range(-50,50)]
-plt.figure(2)
-plt.plot(xs,[normal_cdf(x,sigma=1) for x in xs],'-',label='mu=0, sigma=1')
-plt.plot(xs,[normal_cdf(x,sigma=2) for x in xs],'--',label='mu=0, sigma=2')
-plt.plot(xs,[normal_cdf(x,sigma=.5) for x in xs],':',label='mu=0,sigma=.5')
-plt.plot(xs,[normal_cdf(x,mu=-1) for x in xs],'-.',label='mu=-1, sigma=1')
-plt.legend()
-plt.title("Various Normal CDFs")
+
+# Lets make a few plots
 
 ############################################################################
 # Binary search algorithm for inverse cdf
@@ -135,7 +119,7 @@ def inverse_normal_cdf(p ,mu=0 ,sigma=1, tolerance =0.0001):
             break
     return mid_z
 
-print "The z value for probability 0.75 is %f" %(inverse_normal_cdf(0.95))
+#print "The z value for probability 0.75 is %f" %(inverse_normal_cdf(0.95))
 
 ############################################################################
 # Central limit Thm
@@ -160,26 +144,63 @@ def binomial(n,p):
 # now the central limit thm says that as n gets large binomial(n,p) 
 # approaches a normal distribution with mean np and std = sqrt(np(1-p))
 # lets plot to see that this is the case
-def make_hist(p, n, num_points):
-    """ makes a histogram of binomial data and normal data to show the 
-        truth of the central limit theorem"""
-    data = [binomial(n,p) for _ in range(num_points)]
-    # use a bar chart to show the distribution of bin(n,p)
-    histogram = Counter(data)
-    plt.figure(3)
-    plt.bar([x - 0.4 for x in histogram.keys()],
+
+if __name__ == '__main__':
+
+    # print out the probabilities
+    print "P(both|older): ", both_girls / float(older_girl)
+    print "P(both|either): ", both_girls / float(either_girl)
+
+    # print some sample PDFS
+    xs = [x/10.0 for x in range(-50,50)]
+    plt.figure(1)
+    plt.plot(xs,[normal_pdf(x,sigma=1) for x in xs],'-',
+             label='mu=0, sigma=1')
+    plt.plot(xs,[normal_pdf(x,sigma=2) for x in xs],'--',
+             label='mu=0, sigma=2')
+    plt.plot(xs,[normal_pdf(x,sigma=.5) for x in xs],':',
+             label='mu=0,sigma=.5')
+    plt.plot(xs,[normal_pdf(x,mu=-1) for x in xs],'-.',
+             label='mu=-1, sigma=1')
+    plt.legend()
+    plt.title('Various Normal PDFs')
+
+    # print the CDFS
+    xs = [x/10.0 for x in range(-50,50)]
+    plt.figure(2)
+    plt.plot(xs,[normal_cdf(x,sigma=1) for x in xs],'-',
+             label='mu=0, sigma=1')
+    plt.plot(xs,[normal_cdf(x,sigma=2) for x in xs],'--',
+             label='mu=0, sigma=2')
+    plt.plot(xs,[normal_cdf(x,sigma=.5) for x in xs],':',
+             label='mu=0,sigma=.5')
+    plt.plot(xs,[normal_cdf(x,mu=-1) for x in xs],'-.',
+             label='mu=-1, sigma=1')
+    plt.legend()
+    plt.title("Various Normal CDFs")
+
+    def make_hist(p, n, num_points):
+        """ makes a histogram of binomial data and normal data to show the 
+            truth of the central limit theorem"""
+        data = [binomial(n,p) for _ in range(num_points)]
+        # use a bar chart to show the distribution of bin(n,p)
+        histogram = Counter(data)
+        plt.figure(3)
+        plt.bar([x - 0.4 for x in histogram.keys()],
             [v/float(num_points) for v in histogram.values()],
             0.8, color = '0.75')
     
-    # now make the normal distribution
-    mu = n*p
-    sigma = math.sqrt(n*p*(1-p))
+        # now make the normal distribution
+        mu = n*p
+        sigma = math.sqrt(n*p*(1-p))
 
-    # make a line chart to overlay onto the binomial distribution
-    xs = range(min(data), max(data)+1)
-    ys = [normal_pdf(x,mu,sigma) for x in xs]
-    plt.plot(xs,ys)
-    plt.title("Binomial Distribution vs. Normal Approximation")
+        # make a line chart to overlay onto the binomial distribution
+        xs = range(min(data), max(data)+1)
+        ys = [normal_pdf(x,mu,sigma) for x in xs]
+        plt.plot(xs,ys)
+        plt.title("Binomial Distribution vs. Normal Approximation")
 
-make_hist(0.75,100,1000)
-plt.show()
+    make_hist(0.75,100,1000)
+    plt.show()
+
+

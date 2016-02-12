@@ -32,10 +32,7 @@ num_heads = Counter(successes)
 xs = range(0,n)
 # the ys is the number of times k heads occurs
 ys = [num_heads[x] for x in xs]
-# set up a new figure
-plt.figure(1)
-# make a bar plot
-plt.bar(xs,ys)
+# make a bar plot (SEE MAIN)
 
 ############################################################################
 # Mean
@@ -50,7 +47,6 @@ def mean(x):
     return sum(x)/float(len(x))
 
 # print the sample mean of the binomial distribution above
-print "The mean number of heads is %f" %(mean(successes))
 
 ############################################################################
 # Median
@@ -72,7 +68,6 @@ def median(x):
         hi = midpt
         return (sorted_x[hi] + sorted_x[lo])/float(2)
 
-print "The median value is %f" %(median(successes))
 
 ############################################################################
 # Quantile
@@ -115,14 +110,11 @@ def variance(x):
     n = float(len(x))
     return sum_of_squares(demean(x))/(n-1)
 
-print "The variance in the number of heads is %f" %(variance(successes))
 
 def standard_deviation(x):
     """ Computes the standard deviation of x """
     std = math.sqrt(variance(x))
     return std
-print "The standard deviation in the number of heads is %f" 
-        %(standard_deviation(successes))
 
 ###########################################################################
 # Covariance and Correlation
@@ -145,4 +137,17 @@ def correlation(x,y):
     else:
         return 0
 
-plt.show()
+if __name__ == '__main__':
+    
+    # set up a new figure
+    plt.figure(1)
+    # make a bar plot
+    plt.bar(xs,ys)
+
+    print "The mean number of heads is %f" %(mean(successes))
+    print "The median value is %f" %(median(successes))
+    print "The variance in the number of heads is %f" %(variance(successes))
+    print "The standard deviation in the number of heads is %f" %(
+           standard_deviation(successes))
+
+    plt.show()
