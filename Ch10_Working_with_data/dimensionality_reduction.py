@@ -92,6 +92,50 @@ def first_principal_component(data):
 
 principal_1 = first_principal_component(de_meaned_data)
 
+
+# Project data onto PC #
+########################
+def project(v,w):
+    """ projects vector v onto w """
+    projection_length = Ch4.dot_product(v,w)
+    return Ch4.scalar_multiply(projection_length,w)
+
+# Remove PC to find more components #
+#####################################
+def remove_projection_from_vector(v,w):
+    """ projects v onto w and then subtracts the projection from v """
+    return Ch4.vector_subtract(v, project(v,w))
+
+def remove_projection(data,w):
+    return [remove_projection_from_vector(r_i,w) for r_i in data]
+
+# Functions for higher order data sets #
+########################################
+# On higher dimensional data sets we can iteraviely find PCs remove them and
+# find the next one. Here are the functions to accomplish this
+def principal_component_analysis(data, num_components):
+    """ employs gradient descent to compute the principal components of
+        data """
+    components = []
+    for _ in range(num_components):
+        # compute principal component
+        component = first_principal_component(data)
+        components.append(component)
+        data = remove_projection(data, component)
+    return components
+
+def transform_vector(v, components):
+    """ projects a data vector (row) onto the components """
+    return [dot(v, w) for w in components]
+
+def transform(data, components):
+    """ removes the principal components of data returning a lower dim data
+        set """
+    return [transform_vector(r_i, components) for r_i in data]
+
+
+# If run as Main #
+##################
 if __name__ == '__main__':
     # plt the non-zero mean data
     plt.figure(1)
@@ -101,14 +145,22 @@ if __name__ == '__main__':
     # plt the zero mean data
     plt.figure(2)
     plt.scatter(de_xs,de_ys, marker='.', color = 'gray')
-    plt.title('data with zero mean')
 
     # plot the first principal component on the scaled data
     print "The principal comonent is: [%f,%f]" %(principal_1[0], 
           principal_1[1])
     ax = plt.gca()
-    ax.arrow(0, 0, principal_1[0], principal_1[1], width = 0.05, 
-             color = 'r', head_width=0.1, head_length=0.1, fc='r',ec='r')
-    plt.show()
+    ax.arrow(0, 0, principal_1[0], principal_1[1], width = 0.01, 
+             color = 'r', head_width=0.05, head_length=0.1, fc='r',ec='r')
+    plt.title('Zero-meaned data with first Principal Component')
+    
+    # Plot the data projected onto the first PC
+    plt.figure(3)
+    projected_data = remove_projection(de_meaned_data,principal_1)
+    de_x_proj = Ch4.get_col(projected_data,0)
+    de_y_proj = Ch4.get_col(projected_data,1)
+
+    plt.scatter(de_x_proj,de_y_proj,marker='.',color='blue')
+    
     
     plt.show()
