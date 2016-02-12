@@ -7,7 +7,7 @@ import math
 import random
 
 from collections import Counter
-from matplotlib import pyplot as plti
+from matplotlib import pyplot as plt
 from Ch4_Linear_Algebra import shape, get_col
 from Ch6_Probability import inverse_normal_cdf
 
