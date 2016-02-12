@@ -30,10 +30,7 @@ ys = np.linspace(-10,10,100)
 xx,yy = np.meshgrid(xs,ys)
 zs = xx**2 + yy**2
 
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-ax.plot_surface(xx, yy, zs, cmap = cm.jet)
-#plt.show()
+# See Plot Below
 
 ##############################
 # Estimate Gradient
@@ -100,8 +97,6 @@ while True:
     iteration_number += 1
 
 minimum_z = sum_of_squares(v)
-print "[x,y]= [%.5f, %.5f] yields a minimum z of %.5f in %d iterations" 
-        %(v[0],v[1], minimum_z, iteration_number)
 
 """A potential problem here is how do we know what step size to choose? One 
 way to do this is to provide a list of step sizes and test each one. However
@@ -127,7 +122,8 @@ Here is the general implementation of the gradient descent."""
 def minimize_batch(target_fn, gradient_fn, theta_0, tolerance = 0.00001):
     """ use gradient to find theta that minimizes target func """
     # set a variable step size, we'll locate the optimal
-    step_sizes = [100/float(x) for x in range(1,9)]
+    step_sizes = [100, 10, 1, 0.1, 0.01, 0.001, 0.0001, 
+                  0.00001, .000001]
     
     # set the initial value of the parameters 
     theta = theta_0
@@ -135,23 +131,33 @@ def minimize_batch(target_fn, gradient_fn, theta_0, tolerance = 0.00001):
     target_fn = safe(target_fn)
     # value to be minimized
     value = target_fn(theta)
+    
+    iteration = 0;
 
     while True:
         # compute the gradient at the current theta set
         gradient = gradient_fn(theta)
         # take a step along the gradient
-        next_thetas = [step(theta, gradient,step_size) 
+        next_thetas = [step(theta, gradient,-step_size) 
                         for step_size in step_sizes]
         # choose the next_theta that minimizes the target func
         next_theta = min(next_thetas, key=target_fn)
         # update the next value of the function
         next_value = target_fn(next_theta)
-
+        
         # stop if we are converging
         if abs(value - next_value) < tolerance:
-            return theta
+            return theta, value, iteration
+
+        elif iteration == 10000:
+            print 'Exceeded 10000 iterations. Last theta: [%.5f, %.5f],'\
+            " Last Value: %.5f" %(theta[0],theta[1], value)
+
+            return theta, value, iteration
+
         else:
-        theta, value = next_theta, next_value
+            theta, value = next_theta, next_value
+            iteration += 1
 
 # We also need a way to compute maximums of target_fn we will do this by 
 # minimizing the negative of f
@@ -164,7 +170,7 @@ def negate_all(f):
     return lambda *args, **kwargs: [-y for y in f(*args,**kwargs)]
 
 # now we can define maximize_batch
-def maximize_batch(target_fn, gradient_fn, theta_0, tolerance = 0.000001):
+def maximize_batch(target_fn, gradient_fn, theta_0, tolerance = 0.00001):
     return minimize_batch(negate(target_fn), negate_all(gradient_fn), 
                           theta_0,
                           tolerance)
@@ -234,3 +240,25 @@ def minimize_stochastic(target_fn, gradient_fn, x, y,
 def maximize_stochastic(target_fn, gradient_fn, x, y, theta_0, eta = 0.01):
     return minimize_stochastic(negate(target_fn), negate_all(gradient_fn),
                                x, y, theta_0, eta_0)
+
+if __name__ == '__main__':
+    
+    # plot of the target function to minimize
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.plot_surface(xx, yy, zs, cmap = cm.jet)
+    plt.show()
+
+    # computed by hand method
+    print 'Hand Method'
+    print '[x,y]= [%.5f, %.5f] yields a minimum z ' \
+          'of %.5f in %d iterations'  %(v[0],v[1],
+          minimum_z, iteration_number)
+
+    # computed using minimize_batch method
+    print 'Batch Method'
+    theta, value, iteration = minimize_batch(sum_of_squares, 
+                                              sum_of_squares_gradient, 
+                                              [2,2])
+    print '[x,y]= [%.5f, %.5f] yields a minimum z of %.5f in %d'\
+          ' iterations' %(theta[0], theta[1], value, iteration)
