@@ -75,8 +75,18 @@ def day_over_day_changes(grouped_rows):
     # zip with an offset on consecutive days
     return [{'symbol': today['symbol'], 'date': today['date'],
              'change': percent_price_change(yesterday,today)}
-             for yesterday, today in zip(ordered,ordered[1:])]
+             for yesterday, today in zip(ordered, ordered[1:])]
 
+# now call group by symbol and value transorm the rows with day over day
+# changes
 changes_by_symbol = group_by('symbol', data, day_over_day_changes)
-    
 
+#collect all the change dicts into a list
+all_changes = [change for changes in changes_by_symbol.values() for change
+               in changes]
+    
+# now find largest changes
+print max(all_changes, key=lambda row: row['change'])
+
+# similarly we find the min changes
+print min(all_changes, key=lambda row: row['change'])
