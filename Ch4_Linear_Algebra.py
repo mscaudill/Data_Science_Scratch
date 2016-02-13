@@ -19,8 +19,7 @@ def vector_add(v, w):
 ############################################################################
 def vector_subtract(v,w):
     """ returns the vector subtraction of list v and w """
-    return[x-y for x,y in zip(v,w)]
-
+    return [x-y for x,y in zip(v,w)]
 ###########################################################################
 # Vector sum
 ############################################################################
@@ -55,12 +54,13 @@ def dot_product(v,w):
 ############################################################################
 def sum_of_squares(v):
     """ returns the sum  v1**2 + v2**2 +... """
-    return sum([x**2 for x in v])
+    return sum([v_i**2 for v_i in v]) 
     
 ############################################################################
 # magnitude
 ############################################################################
 def magnitude(v):
+    print v
     return math.sqrt(sum_of_squares(v))
 
 ############################################################################
@@ -75,7 +75,7 @@ def squared_distance(v,w):
 ############################################################################
 def distance(v,w):
     """ returns the magnitude of squared distance between v and w """
-    return magnitude(squared_distance(v,w))
+    return math.sqrt(squared_distance(v,w))
 
 
 ############################################################################
