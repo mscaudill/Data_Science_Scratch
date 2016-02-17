@@ -24,6 +24,9 @@ A simple way is too split your data into two sets, a training set in which
 you determine the optimal parameters of the model and a testing set where
 measure the model's performance with no further parameter modifications.
 """
+
+import random
+
 def split_data(data, prob):
     """ split data into fractions [prob, 1-prob] """
     results = [], []
@@ -72,7 +75,7 @@ def precision(tp, fp):
         we got right to the number we got wrong"""
     return tp / float(tp + fp)
 
-def recall(tp, fn)
+def recall(tp, fn):
     """ measures the number of correct identifications to the number of
         missed identifications """
     return tp / float(tp + fn)
