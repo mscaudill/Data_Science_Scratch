@@ -5,7 +5,7 @@ distribution and look at some statistics that describe the data
 from numpy import random
 from matplotlib import pyplot as plt
 from collections import Counter
-from Ch4_Linear_Algebra import sum_of_squares
+from Ch4_Linear_Algebra import sum_of_squares, dot_product
 
 import math
 
