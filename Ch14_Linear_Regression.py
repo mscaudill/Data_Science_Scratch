@@ -33,13 +33,29 @@ def least_squares_fit(x, y):
     beta_0 = mean(y) - beta_1 * mean(x)
     return beta_0, beta_1
 
-# make some fake data to play with
-x = [random.random() + 5 for _ in range(100)]
-y = [3*x_i + random.random()/2 for x_i in x]
+# We also need to report the amount of variance that is accounted for by X
+# and epsilon. Recall this is just the squared correlation coeffecient r**2
+# called the coeffecient of determination. In the book the author does this
+# differently recall var(Y) = beta_1**2 * var(x) + var(eps). If we divide by
+# var(y) the first term on the RHS will be r**2 and the second will be
+# var(eps)/var(Y). The author calculates r**2 as 1-var(eps)/var(Y). We
+# calculate the first term directly here
+def r_squared(x, y):
+    """ Return the coeffecient of determination (the squared correlation) of
+    the x, y pairs """
+    return (covariance(x,y))**2 / float(variance(x)*variance(y))
 
-plt.scatter(x,y)
 
-beta_0, beta_1 = least_squares_fit(x,y)
+if __name__ == '__main__':
 
-plt.plot(x,[beta_0 + beta_1*x_i for x_i in x])
-plt.show()
+    # make some fake data to play with
+    x = [random.random() + 5 for _ in range(100)]
+    y = [3*x_i + random.random()/2 for x_i in x]
+
+    plt.scatter(x,y)
+
+    beta_0, beta_1 = least_squares_fit(x,y)
+
+    plt.plot(x,[beta_0 + beta_1*x_i for x_i in x])
+    plt.show()
+    print "r^2 is: %.3f" %(r_squared(x,y))
