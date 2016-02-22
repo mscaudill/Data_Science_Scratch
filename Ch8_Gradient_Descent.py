@@ -175,17 +175,6 @@ def maximize_batch(target_fn, gradient_fn, theta_0, tolerance = 0.00001):
                           theta_0,
                           tolerance)
                             
-"""the function above is called minimize_BATCH because our update rule was 
-theta := theta_old - step_size*grad(f(theta_old)) and we did this for n 
-iterations which meansfor n iterations we have 
-theta_min ~= theta_olds - step_size*sum(grad(f(theta(i)))) where i runs from
-1 to n observations or iterations. In fact it is even worse because we used 
-multiple step sizes for example for 10 step sizes this sum(gradients) would 
-have been carried out 10X more. So this method is very slow. To summarize **
-"We don't want to compute the gradient of target_fn (also called obj. funct)
-on all the theas (also called training set) that brings us to the minimum th
-eta. So we explore stochastic gradient descent next"""
-
 ##############################
 # Stochastic gradient descent
 ##############################
@@ -197,7 +186,7 @@ theta := theta - eta*gradient(target_fn)"""
 def in_random_order(data):
     """generator that returns the elements of data in random order"""
     # create a list of indexes
-    indexes = [i for _,i in enumerate(data)]
+    indexes = [i for i,_ in enumerate(data)]
     # shuffle
     random.shuffle(indexes)
     for i in indexes:
@@ -217,7 +206,10 @@ def minimize_stochastic(target_fn, gradient_fn, x, y,
 
     # Do not let iterations exceed 100
     while iterations_with_no_improvement < 100:
-        value = sum( target_fn(x_i,y_i,theta) for x_i,y_i in data )
+        
+        print 'iteration number: %g' %(iterations_with_no_improvement)
+        
+        value = sum( target_fn(x_i, y_i, theta) for x_i, y_i in data )
 
         if value < min_value:
             # if the new value is less than the old one save it and go
@@ -235,7 +227,7 @@ def minimize_stochastic(target_fn, gradient_fn, x, y,
             gradient_i = gradient_fn(x_i, y_i, theta)
             theta = vector_subtract(theta, scalar_multiply(eta,gradient_i))
 
-    return min_theta
+    return min_theta, min_value
 
 def maximize_stochastic(target_fn, gradient_fn, x, y, theta_0, eta = 0.01):
     return minimize_stochastic(negate(target_fn), negate_all(gradient_fn),
@@ -262,3 +254,4 @@ if __name__ == '__main__':
                                               [2,2])
     print '[x,y]= [%.5f, %.5f] yields a minimum z of %.5f in %d'\
           ' iterations' %(theta[0], theta[1], value, iteration)
+
