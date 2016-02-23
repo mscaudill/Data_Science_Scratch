@@ -207,7 +207,8 @@ def minimize_stochastic(target_fn, gradient_fn, x, y,
     # Do not let iterations exceed 100
     while iterations_with_no_improvement < 100:
         
-        print 'iteration number: %g' %(iterations_with_no_improvement)
+        #print 'iterations with no improvement: %g' %(
+              #iterations_with_no_improvement)
         
         value = sum( target_fn(x_i, y_i, theta) for x_i, y_i in data )
 
@@ -227,9 +228,10 @@ def minimize_stochastic(target_fn, gradient_fn, x, y,
             gradient_i = gradient_fn(x_i, y_i, theta)
             theta = vector_subtract(theta, scalar_multiply(eta,gradient_i))
 
-    return min_theta, min_value
+    return min_theta
 
-def maximize_stochastic(target_fn, gradient_fn, x, y, theta_0, eta = 0.01):
+def maximize_stochastic(target_fn, gradient_fn, x, y, theta_0, 
+                        eta_0 = 0.01):
     return minimize_stochastic(negate(target_fn), negate_all(gradient_fn),
                                x, y, theta_0, eta_0)
 
