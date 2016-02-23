@@ -8,9 +8,9 @@ using minimization of sum_of_squared errors.
 from DS_Scratch.Ch4_Linear_Algebra import dot_product
 from Ch8_Gradient_Descent import minimize_stochastic
 from matplotlib import pyplot as plt
-
+from numpy import linspace as lspace
 import random
-
+import math 
 
 def predict(x_i, beta):
     """ assumes x_i1 = 1 and beta is a vector the length of x_i """
@@ -43,19 +43,18 @@ def estimate_beta(x, y):
 
 if __name__=='__main__':
     # Lets make some fake data to examine we will make the data of the form
-    # y = 5+3.2*x1 - 0.5*x2**2 + N(0,3)
-    x1 = range(1,20)
-    x2 = range(1,20)
-    # add the constant term
-    x1.insert(0,1)
-    x2.insert(0,1)
-    xs = zip(x1,x2)
+    # y = 1 + 3.2*x1 - 0.5*x2 + 10*N(0,1) ; x2 = 1 / x1 and so lin. indpt
     
-    ys = [3.2*xs[point][0]-0.5*xs[point][1]**2 + 
-          20*random.random() for point,_ in xs]
+    constant = [1 for _ in range(19)]
+    x1 = [el for el in lspace(1,10,19)]
+    x2 = [1/float(el) for el in lspace(1,10,19)]
+    xs = [list(tup) for tup in zip(constant, x1, x2)]
 
-    plt.figure
+    
+    ys = [xs[point][0] + 3.2 * xs[point][1] - 0.5 * xs[point][2] +
+         random.random() for  point, _ in enumerate(xs)]
+
+    plt.figure()
     plt.scatter(range(len(xs)),ys)
     plt.show()
-
-    print estimate_beta(xs,ys)
+    print estimate_beta(xs, ys)
