@@ -81,7 +81,7 @@ def directional_variance_gradient(data, w):
 ###################################################
 # PC1 is the direction that maximizes the directional_variance_gradient
 def first_principal_component(data):
-    guess = data[0]
+    guess = [1 for _ in data[0]]
     # use partial to make the target and grade fncs a variable of w only
     unscaled_maximizer, _, _ = Ch8.maximize_batch(
                             partial(directional_variance, data),
@@ -92,6 +92,19 @@ def first_principal_component(data):
 
 principal_1 = first_principal_component(de_meaned_data)
 
+# Determine Principal Component by SGD #
+########################################
+def first_principal_component_SGD(data):
+    """ Uses SGD method to determine the direction that maximizes the
+        directional_variance gradient """
+    guess = data[0]
+    unscaled_maximizer, _ = Ch8.maximize_stochastic(lambda x,_,w:
+                            directional_variance_i(x,w), lambda x,_,w:
+                            directional_variance_gradient_i(x,w), data, 
+                            [None for _ in data], guess)
+    return direction(unscaled_maximizer)
+
+principal_1_sgd = first_principal_component_SGD(data)
 
 # Project data onto PC #
 ########################
@@ -149,6 +162,9 @@ if __name__ == '__main__':
     # plot the first principal component on the scaled data
     print "The principal comonent is: [%f,%f]" %(principal_1[0], 
           principal_1[1])
+    print "The principal comonent by SGD is: [%f,%f]" %(principal_1_sgd[0],
+          principal_1_sgd[1])
+
     ax = plt.gca()
     ax.arrow(0, 0, principal_1[0], principal_1[1], width = 0.01, 
              color = 'r', head_width=0.05, head_length=0.1, fc='r',ec='r')
