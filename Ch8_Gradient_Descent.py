@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import numpy as np
 from Ch4_Linear_Algebra import vector_subtract, scalar_multiply
-
+import decimal
 ##############################
 # Create target func to minimize
 ##############################
@@ -221,7 +221,11 @@ def minimize_stochastic(target_fn, gradient_fn, x, y,
             # we are not improving so shrink the step size and 
             # increment iteration
             iterations_with_no_improvement += 1
-            eta *= 0.9
+            # see if eta is a decimal type and match increment accordingly
+            if type(eta)==decimal.Decimal:
+                eta *= decimal.Decimal( 0.9)
+            else:
+                eta *= 0.9
 
         # take a gradient step for each of the data points
         for x_i, y_i in in_random_order(data):
