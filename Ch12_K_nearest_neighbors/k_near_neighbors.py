@@ -8,6 +8,7 @@ neighbors (based on longitude and latitude).
 from collections import Counter
 from matplotlib import pyplot as plt
 from prog_lang_cities import cities as city_langs
+from plot_state_bounds import plot_states
 
 import DS_Scratch.Ch4_Linear_Algebra as Ch4
 
@@ -86,7 +87,8 @@ if __name__ == '__main__':
     plt.legend(loc=0)
     plt.axis([-130,-60,20,55])
     plt.title("Favorite Programming Language")
-    plt.show()
+    # call the plot_states function from the plot_states_boundaries mod.
+    plot_states(plt)
 
     """ In this section, we will try to predict for each city what its
     preferred programming language is by looking at the preferred
@@ -144,6 +146,8 @@ if __name__ == '__main__':
 
     plt.axis([-130,-60,20,55])
     plt.title("Favorite Programming Language By Region")
+    # call the plot_states function from the plot state bounds mod
+    plot_states(plt,color = 'black')
     plt.show()
         
 
