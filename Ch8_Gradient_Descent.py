@@ -211,7 +211,7 @@ def minimize_stochastic(target_fn, gradient_fn, x, y,
               #iterations_with_no_improvement)
         
         value = sum( target_fn(x_i, y_i, theta) for x_i, y_i in data )
-
+        
         if value < min_value:
             # if the new value is less than the old one save it and go
             # back to the original step size
