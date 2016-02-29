@@ -5,11 +5,13 @@ as a linear algebra problem Y = X*beta + eps where X is a matrix of
 coeffecients and beta, epsi are vectors. We again will solve the problem
 using minimization of sum_of_squared errors.
 """
-from DS_Scratch.Ch4_Linear_Algebra import dot_product
+from DS_Scratch.Ch4_Linear_Algebra import dot_product, vector_add
 from Ch8_Gradient_Descent import minimize_stochastic
 from matplotlib import pyplot as plt
 from numpy import linspace as lspace
 from tqdm import tqdm
+from functools import partial
+
 import random
 import math 
 import decimal
@@ -83,8 +85,48 @@ def estimate_sample_beta(sample):
     # return beta estimate for this sample
     return estimate_beta(x_sample, y_sample)
 
+# Regularization #
+##################
+""" In order to discourage overfitting a sample, that is increasing the
+number of non-zero components (coeffecients) in the beta vector we penalize by adding to the error term a so called ridge penalty """
+def ridge_penalty(beta, alpha):
+    """ alpha is a hyperparameter that scales how strong the penalty is. The
+        penalty is chosen to be the square of the betas ignoring the
+        constant term """
+    return alpha * dot_product(beta[1:], beta[1:])
+
+def squared_error_ridge(x_i, y_i, beta, alpha):
+    """ error term with penalty on beta """
+    return error(x_i, y_i, beta) ** 2 + ridge_penalty(beta, alpha)
+
+""" Now we can simply plug squared_error_ridge int the SGD method as
+    before """
+def ridge_penalty_gradient(beta, alpha):
+    """ gradient of the ridge penalty """
+    return [0] + [2 * alpha * beta_j for beta_j in beta[1:]]
+
+def squared_error_ridge_gradient(x_i, y_i, beta, alpha):
+    """ returns the full gradient of the error term including ridge
+        penalty """
+    return vector_add(squared_error_gradient(x_i, y_i, beta), 
+                      ridge_penalty_gradient(beta, alpha))
+
+""" Finally call the SGD method minimizing the squared error ridge func """
+def estimate_beta_ridge(x, y, alpha):
+    """ SGD estimate of beta by minimizing the squared error and the
+        ridge penalty scale alpha. """
+    beta_initial = [decimal.Decimal(random.random()) for _ in x[0]]
+    return minimize_stochastic(partial(squared_error_ridge, alpha=alpha), 
+                               partial(squared_error_ridge_gradient,
+                               alpha=alpha), x, y, beta_initial, 
+                               decimal.Decimal(0.001))
+
+
 
 if __name__=='__main__':
+
+    # Make some fake data to fit #
+    ##############################
     # Lets make some fake data to examine we will make the data of the form
     # y = 1 + 3.2*x1 - 0.5*x2 + 10*N(0,1) ; x2 = x**2 and so lin. indpt
     # Important note: when I first tried to find the beta = [1, 3.2, 0.5] I
@@ -99,16 +141,23 @@ if __name__=='__main__':
     x2 = [decimal.Decimal(el**2) for el in lspace(-4,4,99)]
     xs = [list(tup) for tup in zip(constant, x1, x2)]
 
-    
+    # set seed 0 so we get repeatable results
+    random.seed(0)
+
     ys = [xs[point][0] + decimal.Decimal(3.2) * xs[point][1] -
           decimal.Decimal(0.5) * xs[point][2] + 
           decimal.Decimal(random.random()) for  point, _ in enumerate(xs)]
 
+    # Plot data and generate Beta estimate #
+    ########################################
     plt.figure()
     plt.scatter(range(len(xs)),ys)
     plt.show()
+    print "Stochastic Gradient Descent: Ridge Penalty 0 "
     print estimate_beta(xs, ys)
 
+    # Bootstrap to get the error in Beta estimate #
+    ################################################
     # now get the error estimate of betas
     bootstrap_betas = bootstrap_statistic(zip(xs, ys), 
                                           estimate_sample_beta,
@@ -123,3 +172,34 @@ if __name__=='__main__':
     print "The Bootstrapped Standard Error is: "
     print bootstrap_standard_errors
     
+    # Beta estimate for various ridge penalties #
+    #############################################
+    print "Stochastic Gradient Descent: Ridge Penalty = 0.01"
+    beta_0_01 = estimate_beta_ridge(xs, ys, 
+                                         alpha=decimal.Decimal(0.01))
+    print beta_0_01
+    print " Sum of squares of beta = %.5f " %(dot_product(beta_0_01[1:], 
+                                              beta_0_01[1:]))
+
+    print "Stochastic Gradient Descent: Ridge Penalty = 0.1"
+    beta_0_1 = estimate_beta_ridge(xs, ys, 
+                                         alpha=decimal.Decimal(0.1))
+    print beta_0_1
+    print " Sum of squares of beta = %.5f " %(dot_product(beta_0_1[1:], 
+                                              beta_0_1[1:]))
+
+    print "Stochastic Gradient Descent: Ridge Penalty = 1.0"
+    beta_1= estimate_beta_ridge(xs, ys, 
+                                         alpha=decimal.Decimal(1.0))
+    print beta_1
+    print " Sum of squares of beta = %.5f " %(dot_product(beta_1[1:], 
+                                              beta_1[1:]))
+
+    print "Stochastic Gradient Descent: Ridge Penalty = 10.0"
+    beta_10 = estimate_beta_ridge(xs, ys, 
+                                         alpha=decimal.Decimal(10.0))
+    print beta_10
+    print " Sum of squares of beta = %.5f " %(dot_product(beta_10[1:], 
+                                              beta_10[1:]))
+
+
