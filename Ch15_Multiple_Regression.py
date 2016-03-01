@@ -45,10 +45,17 @@ def squared_error_gradient(x_i, y_i, beta):
 
 # now we are ready for stochastic gradient descent to get beta
 def estimate_beta(x, y):
+    
     # guess the initial beta
-    beta_initial = [decimal.Decimal(random.random()) for _ in x[0]]
+    #beta_initial = [decimal.Decimal(random.random()) for _ in x[0]]
+    #return minimize_stochastic(squared_error, squared_error_gradient,
+    #                           x, y, beta_initial, decimal.Decimal(0.001))
+    # guess the initial beta
+    beta_initial = [random.random() for _ in x[0]]
     return minimize_stochastic(squared_error, squared_error_gradient,
-                               x, y, beta_initial, decimal.Decimal(0.001))
+                               x, y, beta_initial, 0.001)
+
+
 
 # Goodness of fit #
 ###################
