@@ -8,7 +8,7 @@ matrix
 
 """
 
-from DS_Scratch.Ch4_Linear_Algebra import shape, get_col
+from DS_Scratch.Ch4_Linear_Algebra import shape, get_col, make_matrix
 from DS_Scratch.Ch5_Data_Statistics import mean, standard_deviation
 
 def scale(data_matrix):
