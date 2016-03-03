@@ -7,8 +7,16 @@ This model will fail. We then will use a logistic regression model """
 
 from sample_data import data as data
 from matplotlib import pyplot as plt
-from DS_Scratch.Ch10_Working_with_data.rescaling import norm_matrix
+from DS_Scratch.Ch10_Working_with_data.rescaling import norm_matrix, scale
 from DS_Scratch.Ch15_Multiple_Regression import estimate_beta, predict
+from DS_Scratch.Ch4_Linear_Algebra import dot_product, vector_add
+from DS_Scratch.Ch11_Machine_Learning import train_test_split
+from DS_Scratch.Ch8_Gradient_Descent import maximize_stochastic
+from DS_Scratch.Ch5_Data_Statistics import standard_deviation
+from functools import partial
+
+import random
+import math
 
 # Format data #
 ###############
@@ -37,7 +45,66 @@ our value of beta is biased. What we need is for large + values to
 correspond to membership 1 and negativ values to correspond to membership
 0. This is where the logistic function is useful. """
 
+# Logistic function #
+#####################
 
+def logistic(x):
+    return 1.0/(1 + math.exp(-x))
+
+""" The PDF of our model y_i = f(x_i*beta)+e_i can be written as
+p(y_i;x_i,beta) = f(x_i*beta)^y_i * (1-f(x_i*beta))^(1-y_i). Our goal is to
+find beta that maximizes the likelihood function which is just a product of
+p(beta; x_i, y_i) above. We will actually maximize the log of the
+likelihood. The log likelihood is log(L(beta; x_i,y_i)) =
+y_i*log(f(x_i*beta))+(1-y_i)*log(1-f(x_i*beta)). We do all of this instead
+of maximizing the squared error because in the case of a logistic funct f,
+the beta that maximizes the squared error is not the same as the beta that
+maximizes the likelihood function"""
+
+def logistic_log_likelihood_i(x_i, y_i, beta):
+    """ returns the log likelihood of the ith bernoulli trial """
+    if y_i == 1:
+        return math.log(logistic(dot_product(x_i,beta)))
+    else:
+        return math.log(1-logistic(dot_product(x_i,beta)))
+
+""" The total likelihood is just the product of the probabilities (indpt
+assumption) and therefore the log of the likelihood is just the sum of the
+individual log likelihoods"""
+
+def logistic_log_likelihood(x, y, beta):
+    """ this will be a function of beta to be maximized """
+    return sum(logistic_log_likelihood(x_i,y_i,beta) 
+               for x_i,y_i in zip(x,y))
+
+""" To get beta we are going to need the gradient of the logistic log
+likelihood. This I have worked out on paper (see notes) as """
+def logistic_log_partial_ij(x_i, y_i, beta, j):
+    """ here i is the point index and j is the gradient index """
+    return (y_i - logistic(dot_product(x_i,beta))) * x_i[j]
+
+""" now we need to get the full gradient at point x_i,y_i by summing all the partials """
+def logistic_log_gradient_i(x_i, y_i, beta):
+    """ returns the gradient of the log likelihood for point i """
+    return [logistic_log_partial_ij(x_i, y_i, beta, j) for j,_ in
+            enumerate(beta)]
+""" finally we get the gradient at all points """
+def logistic_log_gradient(x, y, beta):
+    """ returns the full logistic log gradient across all points """
+    return reduce(vector_add, [logistic_log_gradient_i(x_i, y_i, beta) 
+                  for x_i, y_i in zip(x,y)])
+
+# Apply the model #
+###################
+random.seed(0)
+# Construct training and test sets
+x_train, x_test, y_train, y_test = train_test_split(rescaled_x, y, 0.33)
+
+# get likelihood and gradient likelihood functions as a func of beta only
+target_fn = partial(logistic_log_likelihood, x_train, y_train)
+gradient_fn = partial(logistic_log_gradient, x_train, y_train)
+
+ # see main for application
 
 if __name__ == '__main__':
     
@@ -60,5 +127,20 @@ if __name__ == '__main__':
     plt.scatter(predictions, y)
     plt.xlabel('predicted')
     plt.ylabel('actual')
+
+    # Compute beta_hat by SGD #
+    ###########################
+    # pick a random initial beta (constant, beta1*experience, beta2*salary)
+    beta_0 = [random.random() for _ in range(3)]
+    beta_hat = maximize_stochastic(logistic_log_likelihood_i,
+                                   logistic_log_gradient_i,
+                                   x_train, y_train, beta_0)
+   
+    print "beta_hat", beta_hat
     
+    # Fit Quality #
+    ###############
+
+
+
     plt.show()
