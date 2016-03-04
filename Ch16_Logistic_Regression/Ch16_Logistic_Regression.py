@@ -14,6 +14,7 @@ from DS_Scratch.Ch11_Machine_Learning import train_test_split
 from DS_Scratch.Ch8_Gradient_Descent import maximize_stochastic
 from DS_Scratch.Ch5_Data_Statistics import standard_deviation
 from functools import partial
+from numpy import linspace
 
 import random
 import math
@@ -27,8 +28,8 @@ x = [[1] + list(row[:2]) for row in data]
 y = [row[2] for row in data]
 
 
-# Rescale data and Beta estimate #
-##################################
+# Rescale data and Linear Model Beta estimate #
+###############################################
 rescaled_x = norm_matrix(x)
 beta = estimate_beta(rescaled_x, y)
 # compute predictions from beta estimate and rescaled x
@@ -137,9 +138,70 @@ if __name__ == '__main__':
                                    x_train, y_train, beta_0)
    
     print "beta_hat", beta_hat
+
+    # Transform beta_hat back to unscaled variables #
+    #################################################
+    # get the means and stds of const, years, experience cols in data
+    means_x, stds_x = scale(x)
+
+    # beta_i i!=0 has the following transform beta_i = beta_i_scaled/sigma_i
+    # and beta_0 is 
+    beta_hat_unscaled =[beta_hat[0],
+                        beta_hat[1]/stds_x[1], 
+                        beta_hat[2]/stds_x[2]]
+    print "beta_hat_unscaled", beta_hat_unscaled
     
     # Fit Quality #
     ###############
+    # Examine the test data
+    true_positives = false_positives = true_negatives = false_negatives = 0
+
+    for x_i, y_i in zip(x_test, y_test):
+        # For the test data get a prediction for y. This will be a
+        # probability between 0 and 1
+        predict = logistic(dot_product(beta_hat, x_i))
+
+        # Set a threshold of 0.5 to make our prediction a binary 0 or 1
+        if y_i == 1 and predict >= 0.5:
+            # increment true positives
+            true_positives += 1
+        elif y_i == 1:
+            # increment false negatives
+            false_negatives += 1
+        elif predict >= 0.5:
+            # increment false positives
+            false_positives += 1
+        else:
+            true_negatives += 1
+    
+    # Get the precision and recall
+    precision = true_positives/float(true_positives + false_positives)
+    recall = true_positives/float(true_positives + false_negatives)
+    print "Prediction Precision = %.3f" %(precision)
+    print "Prediction Recall = %.3f" %(recall)
+
+    # Hyperplane #
+    ##############
+    """ The set of points where dot_product(beta_hat*x_i) = 0 is a decision
+    boundary. Here logistic(0) = 0.5 which we used to separate a paid from
+    unpaid account. This set of points is called a hyperplane. We got this
+    as a consequence of using the logistic model. It is possible to
+    calculate directly a hyperplane without calculating maximizing the 
+    likelihood function of a model. This is not treated in this book. It
+    comes under the heading of Support Vector Machines"""
+   
+
+    years_experience = [row[1] for row in x]
+
+    years = linspace(min(years_experience),
+                                max(years_experience),100)
+
+    hyperplane_ys = [(7.61 + 1.42* year)/0.000240 
+                      for year in years]
+    
+    plt.figure(1)
+    plt.plot(years, hyperplane_ys)
+    plt.title("Logistic Regression Decision Boundary")
 
 
 
