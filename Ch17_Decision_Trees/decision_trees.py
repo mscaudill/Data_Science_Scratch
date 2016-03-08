@@ -99,6 +99,44 @@ def partition_entropy_by(inputs, attribute):
     # compute the entropy of the partitioned data
     return partition_entropy(partitions.values())
 
+# Generalized Decision Tree #
+#############################
+# Here we build a generalized algorithm for a decision tree. The tree will
+# be madeup of the following:
+# True - a leaf node that returns True for any input
+# False - a leaf node that returns False for any input
+# a tuple (attribute, subtree_dict) which is a decision node in our tree.
+
+# Given such a representation we can classify an input with
+def classify(tree, input):
+    """ classify an input using the given decision tree """
+    
+    # if this is a leaf node i.e. True or False return its value
+    if tree in [True, False]:
+        return tree
+
+    # otherwise this tree consist of a decision node that consist of an
+    # attribute and a dictionary whose keys are values of that attribute and
+    # whose values are subtrees to consider next attribute,
+    # subtree_dict = tree
+
+    subtree_key = input.get(attribute) # None if input is missing attribute
+
+    if subtree_key not in subtree_dict:
+        subtree_key = None
+    
+    subtree = subtree_dict[subtree_key] # Get the corresponding subtree
+    # classify the inpput using this subtree until we hit a leaf
+    return classify(subtree, input)
+
+# Build tree representation from the training data
+def build_tree_id3(inputs, split_candidates=None):
+    # if this is our first pass through then all attributes are a splitting
+    # candidate
+    if split_candidates is None:
+        split_candidates = inputs[0][0].keys()
+
+
 
 if __name__ == '__main__':
     
