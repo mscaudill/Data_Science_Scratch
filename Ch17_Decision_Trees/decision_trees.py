@@ -99,7 +99,7 @@ def partition_entropy_by(inputs, attribute):
     # compute the entropy of the partitioned data
     return partition_entropy(partitions.values())
 
-# Generalized Decision Tree #
+# GENERALIZED DECISION TREE #
 #############################
 # Here we build a generalized algorithm for a decision tree. The tree will
 # be madeup of the following:
@@ -107,7 +107,20 @@ def partition_entropy_by(inputs, attribute):
 # False - a leaf node that returns False for any input
 # a tuple (attribute, subtree_dict) which is a decision node in our tree.
 
-# Given such a representation we can classify an input with
+# In our example this means our tree would be represented as
+'''tree = ('level',{'Junior': ('phd', {'no' : True, 'yes' : False}), 
+             'Mid' : 'True',
+             'Senior' : ('tweets' : {'yes' : True, 'no' : False})})'''
+
+# Given such a representation we can classify an input candidate. This
+# candidate is represent by a dict like this one 
+""" input = { 'level': 'Junior', 'lang' : 'Java', 'tweets' : 'yes', 
+      'phd' : 'no'} """
+
+# Classify Input #
+##################
+# Given a tree like the example one above and a candidate we want to
+# classify the candidate as true or false for a good or bad interview.
 def classify(tree, input):
     """ classify an input using the given decision tree """
     
@@ -115,21 +128,29 @@ def classify(tree, input):
     if tree in [True, False]:
         return tree
 
-    # otherwise this tree consist of a decision node that consist of an
-    # attribute and a dictionary whose keys are values of that attribute and
-    # whose values are subtrees to consider next attribute,
-    # subtree_dict = tree
+    # otherwise this is a decision node (like Junior above). We assign this
+    # to a subtree tuple '( 'phd', {'no' : True, 'yes' : False} )
+    attribute, subtree_dict = tree
 
-    subtree_key = input.get(attribute) # None if input is missing attribute
+    # Now we get the key of the subtree (it is just the 
+    # input.get('phd') == 'no'. Will return None if attribute not in input
+    subtree_key = input.get(attribute)
 
     if subtree_key not in subtree_dict:
         subtree_key = None
     
-    subtree = subtree_dict[subtree_key] # Get the corresponding subtree
-    # classify the inpput using this subtree until we hit a leaf
+    # The subtree is then subtree_dict value for the subtree key
+    # (subtree['no'] = False
+    subtree = subtree_dict[subtree_key] 
+    # classify the inpput using this subtree until we hit a leaf. In our
+    # example we have hit a false leaf so the classification yields false on
+    # the next pass of this function
     return classify(subtree, input)
 
-# Build tree representation from the training data
+# Build tree representation #
+#############################
+# Now that we can classify an input we need to build a tree like the
+# example one above. 
 def build_tree_id3(inputs, split_candidates=None):
     # if this is our first pass through then all attributes are a splitting
     # candidate
