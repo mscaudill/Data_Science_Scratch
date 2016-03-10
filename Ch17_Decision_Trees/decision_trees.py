@@ -27,6 +27,7 @@ class base on a set of partitioning attributes """
 import math
 from collections import Counter, defaultdict
 from interviewee_data import data as candidates
+from functools import partial
 
 # Compute Unpartitioned Entropy #
 #################################
@@ -150,14 +151,68 @@ def classify(tree, input):
 # Build tree representation #
 #############################
 # Now that we can classify an input we need to build a tree like the
-# example one above. 
+# example one above. Again the structure of the candidate data is initially
+# [({'level': 'Senior', 'lang': 'Java', 'tweets': 'no','phd' : 'no'}, 
+#   False), (), ...] a list of tuples where the 0th el is an attributes 
+# dictionary and the 1st element is whether they interviewed well.
 def build_tree_id3(inputs, split_candidates=None):
     # if this is our first pass through then all attributes are a splitting
     # candidate
     if split_candidates is None:
         split_candidates = inputs[0][0].keys()
+    
+    # count the trues and falses in inputs
+    num_inputs = len(inputs)
+    num_trues = len([label for _, label in inputs if label])
+    num_falses = num_inputs - num_trues
 
+    # if there are no true values we return a false leaf
+    if num_trues == 0:
+        return False
+    # conversely if only trues return a true leaf
+    if num_falses == 0:
+        return True
 
+    # If we have run out of splitting candidates, return the majority leaf
+    if not split_candidates:
+        return num_trues >= num_falses
+
+    # otherwise split on the best attribute
+    best_attribute = min(split_candidates, 
+                         key=partial(partition_entropy_by, inputs)) 
+
+    # partition the data by the best attribute and get the new candidates
+    partitions = partition_by(inputs, best_attribute)
+    new_candidates = [attribute for attribute in split_candidates
+                      if attribute != best_attribute]
+
+    # recursively build the subtrees
+    subtrees = {attribute_value : build_tree_id3(subset, new_candidates)
+                for attribute_value, subset in partitions.iteritems()}
+
+    subtrees[None] = num_trues >= num_falses
+
+    return (best_attribute, subtrees)
+
+# Random Forest #
+#################
+""" Decision trees have a tendency to overfit training data and so one
+technique to deal with this is to create a random forest in which we build
+multiple decision trees and let them vote on how to classify inputs """
+def forest_classify(trees, input):
+    votes = [classify(tree, input) for tree in trees]
+    vote_counts = Counter(votes)
+    return vote_counts.most_common(1)[0][0]
+
+""" The trees we have made so far have been deterministic because they are
+based on choosing the next attribute with the lowest entropy. How can we
+build random trees? Below are two methods """
+# method one is to bootstrap the candidate data. Since each sample will be
+# different, we will get different trees. This method is call bootstrap
+# aggregating or bagging.
+
+# method two is split on the best attribute from a random selection of
+# all the attributes. This method is called ensemble learning.
 
 if __name__ == '__main__':
     
@@ -182,20 +237,34 @@ if __name__ == '__main__':
     senior_inputs = [(input, label) for input, label in candidates 
                      if input['level'] == 'Senior']
 
-    print 'Senior Branch Entropies ------------'
+    print 'Senior Subtree Entropies ------------------------'
     for key in ['lang', 'tweets', 'phd']:
         print key, partition_entropy_by(senior_inputs, key)
 
     junior_inputs = [(input, label) for input, label in candidates 
                      if input['level'] == 'Junior']
 
-    print 'Junior Branch Entropies ----------'
+    print 'Junior Subtree Entropies ------------------------'
     for key in ['lang', 'tweets', 'phd']:
         print key, partition_entropy_by(junior_inputs, key)
     
     mid_inputs = [(input, label) for input, label in candidates 
                      if input['level'] == 'Mid']
     
-    print 'Mid-level Branch Entropies ------------'
+    print 'Mid-level Subtree Entropies ---------------------'
     for key in ['lang', 'tweets', 'phd']:
         print key, partition_entropy_by(mid_inputs, key)
+
+    print 'Generalized Tree and Classification--------------'    
+
+    # Generalized Tree Build and Classification #
+    #############################################
+    # Build our tree from the candidate data
+    tree = build_tree_id3(candidates)
+    print 'Decision Tree'
+    print tree
+    # classify a candidate
+    print 'Decision Tree Classification'
+    print classify(tree, {'level' : 'Junior', 'lang' : 'Java',
+                          'tweets' : 'yes', 'phd' : 'no'})
+
