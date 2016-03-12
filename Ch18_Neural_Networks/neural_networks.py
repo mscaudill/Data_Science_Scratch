@@ -2,8 +2,10 @@
 """
 
 import math
-from random import random
+import random
 from DS_Scratch.Ch4_Linear_Algebra import dot_product
+from DS_Scratch.Ch18_Neural_Networks.raw_data_digits import raw_digits
+from tqdm import tqdm
 
 # And/Or/Not Perceptrons #
 ##########################
@@ -85,12 +87,13 @@ def backpropagate(network, input_vector, targets):
     # the input which now comes from the output layer for each neuron in the
     # hidden layer
     hidden_deltas = [hidden_output * (1 - hidden_output) * 
-                     dot(output_deltas, [n[i] for n in output_layer])
+                     dot_product(output_deltas, 
+                                 [n[i] for n in output_layer])
                      for i, hidden_output in enumerate(hidden_outputs)]
 
     # update the weights (j) of the hidden layer neurons (i)
     for i, hidden_neuron in enumerate(network[0]):
-        for j, input in enumerate(input_vector) + [1]:
+        for j, input in enumerate(input_vector + [1]):
             hidden_neuron[j] -= hidden_deltas[i] * input
 
     """ A much cleaner way of doing this is to compute the gradient of the
@@ -116,7 +119,7 @@ if __name__ == '__main__':
             # The last one is the output neuron hence [-1]
             print input_1, input_2, feed_forward(xor_network,
                                                  [input_1, input_2])
-    print '--------------------------------------'
+    print '\n'
     
     # CAPTCHA NETWORK #
     ###################
@@ -147,3 +150,27 @@ if __name__ == '__main__':
     # weight
     output_layer = [[random.random() for _ in range(num_hidden + 1)] 
                     for _ in range(output_size)]
+
+    network = [hidden_layer, output_layer]
+    
+    # Function to convert the raw digits to 1's and 0's
+    def make_digit(raw_digit):
+        return [1 if c == '1' else 0
+                for row in raw_digit.split("\n")
+                for c in row.strip()]
+    
+    inputs = map(make_digit, raw_digits)
+
+    # Train the network using backpropagation #10000 iterations
+    for _ in tqdm(range(10000)):
+        for input_vector, target_vector in zip(inputs, targets):
+            backpropagate(network, input_vector, target_vector)
+
+    # We can look to see how well it predicts an input that was present in
+    # the training set
+    def predict(input):
+        return feed_forward(network, input)[-1]
+
+        
+
+    print [round(prediction,3) for prediction in predict(inputs[7])]
