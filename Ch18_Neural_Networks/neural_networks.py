@@ -1,4 +1,8 @@
+""" In this module we will
+"""
+
 import math
+from random import random
 from DS_Scratch.Ch4_Linear_Algebra import dot_product
 
 # And/Or/Not Perceptrons #
@@ -113,6 +117,33 @@ if __name__ == '__main__':
             print input_1, input_2, feed_forward(xor_network,
                                                  [input_1, input_2])
     print '--------------------------------------'
+    
+    # CAPTCHA NETWORK #
+    ###################
+    # We will attept to train a network to identify digits written out on a
+    # 5x5 grid @@@@@
+    #          @...@
+    #          @...@
+    #          @...@
+    #          @@@@@
+    # above is an example of 0 digit. Our input will be a list (25 els) to
+    # represent the number. Our output will be a list (10 el long)
+    print 'CAPTCHA NETWORK-----------------------'
+    # We want to identify digits so we first define the targets, numbers
+    # between 0 and 9 represented as vectors of the identity matrix
+    targets = [[1 if i==j else 0 for i in range(10)] for j in range(10)]
 
+    # Lets now build the network
+    random.seed(0)
+    input_size = 25 # 5 x 5 grid
+    num_hidden = 5 # five neurons in the hidden layer
+    output_size = 10 # 10 possible outputs for each input
 
+    # each hidden neuron will have one weight per input plus a bias weight
+    hidden_layer = [[random.random() for _ in range(input_size + 1)] 
+                    for _ in range(num_hidden)]
 
+    # each output neuron has one weight per hidden neuron input plus a bias 
+    # weight
+    output_layer = [[random.random() for _ in range(num_hidden + 1)] 
+                    for _ in range(output_size)]
