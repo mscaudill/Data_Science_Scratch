@@ -1,8 +1,15 @@
-""" In this module we will
+""" In this module we will create two neural networks. The first will
+perform an exclusive or operation XOR and the second will read in handrawn
+digits and attempt to predict the actual number. We will use a technique
+called backpropagation to adjust the weights that a hidden layer applies to
+each of it's inputs and the output layer weights. This is the same as
+minimizing the error between the output and targets using SGD. 
 """
 
 import math
 import random
+from matplotlib import pyplot as plt
+from matplotlib import cm
 from DS_Scratch.Ch4_Linear_Algebra import dot_product
 from DS_Scratch.Ch18_Neural_Networks.raw_data_digits import raw_digits
 from tqdm import tqdm
@@ -136,7 +143,11 @@ if __name__ == '__main__':
     # between 0 and 9 represented as vectors of the identity matrix
     targets = [[1 if i==j else 0 for i in range(10)] for j in range(10)]
 
-    # Lets now build the network
+    # Lets now build the network, at this point it is not clear why we would
+    # choose 5 hidden layer neurons. The choice of 10 outputs makes sense
+    # since we are trying to represent 10 numbers 0-9. Maybe it is just
+    # empirical that 25 dim space can be represented in 5 dim hidden neurons
+    # and then read out with a high success rate.
     random.seed(0)
     input_size = 25 # 5 x 5 grid
     num_hidden = 5 # five neurons in the hidden layer
@@ -174,3 +185,34 @@ if __name__ == '__main__':
         
 
     print [round(prediction,3) for prediction in predict(inputs[7])]
+
+    # next lets plot the input weights of the hidden layer. It is a 5x5 grid
+    # of inputs onto the 5 hidden layer neurons
+    # create a figure and set of axes 
+    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(12,5))
+    # get the range over which the weights vary
+    min_weight = min(min(ls) for ls in network[0])
+    max_weight = max(max(ls) for ls in network[0])
+
+    # set the min, max value to plot over as the min of the abs(wieghts).
+    # This will round very negative or positive weights
+    value = min(abs(min_weight),max_weight)
+    
+    for neuron in range(5):
+        # get the neurons input weights
+        weights = network[0][neuron]
+        # convert weights to grid
+        grid = [weights[row:(row+5)] for row in range(0,25,5)]
+        # draw with seismic map
+        image = axes[neuron].imshow(grid, interpolation='none',
+                                    vmin=-value, vmax=value,
+                                    cmap=cm.seismic)
+        # title with neuron number
+        axes[neuron].set_title('network[0][%d]' %(neuron))
+    # adjust the subplot positions to allow for a color bar
+    fig.subplots_adjust(right=0.75)
+    # add color bar (x, y, width, height
+    cbar_ax = fig.add_axes([0.8, 0.25, .05, 0.5]) 
+    fig.colorbar(image, cax=cbar_ax) 
+    plt.show()
+
