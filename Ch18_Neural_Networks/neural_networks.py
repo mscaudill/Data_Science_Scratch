@@ -209,6 +209,8 @@ if __name__ == '__main__':
                                     cmap=cm.seismic)
         # title with neuron number
         axes[neuron].set_title('network[0][%d]' %(neuron))
+        # add the bias as the x label
+        axes[neuron].set_xlabel('Bias = %.2f' %(network[0][neuron][-1]))
     # adjust the subplot positions to allow for a color bar
     fig.subplots_adjust(right=0.75)
     # add color bar (x, y, width, height
