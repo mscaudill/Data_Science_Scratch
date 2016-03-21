@@ -40,7 +40,7 @@ def scalar_multiply(c,vector):
 def vector_mean(vectors):
     """ computes a mean vector from a set of vectors"""
     n = len(vectors)
-    return scalar_multiply(1/n, vector_sum(vectors))
+    return scalar_multiply(1/float(n), vector_sum(vectors))
 
 ############################################################################
 # Dot product
