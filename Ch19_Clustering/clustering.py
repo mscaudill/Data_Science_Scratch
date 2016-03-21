@@ -7,6 +7,8 @@
 """
 from DS_Scratch.Ch4_Linear_Algebra import squared_distance, vector_mean
 
+# KMeans Clustering algorithm #
+###############################
 class KMeans(object):
     """ performs k-means clustering """
     def __init__(self, k):
@@ -44,7 +46,56 @@ class KMeans(object):
                 # make sure i_points is not empty so we don't divide by 0
                 if i_points:
                     self.means[i] = vector_mean(i_points)
-                    
+
+# Bottom-Up Clustering Algorithm #
+##################################
+"""
+The steps in bottom up clustering are:
+1. make each input its own cluster of one
+2. As long as there are multiple clusters, merge them to a cluster 
+(merge_order,[leaf1,leaf2])
+"""
+
+# helper functions
+
+def is_leaf(cluster):
+    """ a cluster is a leaf if it has len of 1 """
+    return len(cluster) == 1
+
+def get_children(cluster):
+     """ returns the two children of this cluster if it's a merged cluster;
+        and raises exception if this is a leaf cluster """
+        if is_leaf(cluster):
+            raise TypeError("a leaf cluster has no children")
+        else:
+            return cluster[1]
+
+def get_values(cluster):
+    """ returns the value in this cluster (if its a leaf cluster) or all the
+        values in the leaf clusters below it (if its not) """
+        if is_leaf(cluster):
+            return cluster
+        else:
+            return [value for child in get_children(cluster)
+                          for value in get_values(child)
+
+def cluster_distance(cluster1, cluster2, distance_metric=max):
+    """ compute all pairwise distances of points in cluster1 and cluster2
+        and apply distance_metric to the resulting list """  
+    return distance_metric([distance(input1, input2) 
+                            for input1 in get_values(cluster1)
+                            for input2 in get_values(cluster2)]
+
+def get_merge_order(cluster):
+    """ smaller numbers are later merges so when unmerging we get the
+        smallest merge order first """
+        if is_leaf(cluster):
+            return float('inf')
+        else:
+            return cluster[0]
+
+# Now create main algorithm
+
 
 if __name__ == '__main__':
     
@@ -52,6 +103,7 @@ if __name__ == '__main__':
     ########################
     from meet_up_data import inputs as meetups
     from matplotlib import pyplot as plt
+    import matplotlib.image as mpimg
     import random
 
     xs = [ls[0] for ls in meetups]
@@ -96,11 +148,32 @@ if __name__ == '__main__':
     
     # Clustering Colors #
     #####################
+    image_path = r'/home/giladmeir/Pictures/test.jpg'
+    orig_image = mpimg.imread(image_path)
 
-    
-    
-    
-    
+    # The image is a list of list of list where the innermost list is [r g
+    # b] colors. We will take these colors and map them to 5 colors. First
+    # flatten all the pixels
+    pixels = [pixel for row in orig_image for pixel in row]
+
+    # provide these to the clusterer
+    clusterer = KMeans(5)
+    clusterer.train(pixels)
+
+    # now we just need to recolor each pixel with one of the 5 colors
+    def recolor(pixel):
+        cluster = clusterer.classify(pixel)
+        return clusterer.means[cluster]
+
+    new_image = [[recolor(pixel) for pixel in row] for row in orig_image]
+
+    fig2 = plt.figure(2, figsize=(14,4))
+    ax3 = fig2.add_subplot(121)
+    ax3.imshow(orig_image)
+    ax3.axis('off')
+    ax4 = fig2.add_subplot(122)
+    ax4.imshow(new_image)
+    ax4.axis('off')
     
     
     plt.show()
