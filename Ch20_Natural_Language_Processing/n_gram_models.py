@@ -61,10 +61,6 @@ def bigram_sentence_generator():
             bigram_sentence = " ".join(result)
             return bigram_sentence
 
-print "BIGRAM SENTENCE ------------"
-print bigram_sentence_generator()
-print '\n'
-
 # Trigrams #
 ############
 # The bigram sentence is gibberish, we can make it less so by considering
@@ -98,7 +94,61 @@ def trigram_sentence_generator():
         if current == '.':
             return " ".join(result)
 
-print "TRIGRAM SENTENCE --------------"
-print trigram_sentence_generator()
+# Grammars #
+############
+# Here we will define a set of grammar rules. Underscores are rules that
+# need further expanding and other names are terminals that do not need
+# further expanding. We generate sentences by repeatedly replacing each rule
+# with its child values ex. _S -> _NP _VP a noun phrase and verb phrase ->
+# _N _V which goes to a noun and verb
+grammar = {
+        "_S"  : ["_NP _VP"],
+        "_NP" : ["_N",
+                 "_A _NP _P _A _N"],
+        "_VP" : ["_V",
+                 "_V _NP"],
+        "_N"  : ["data science", "Python", "regression"],
+        "_A"  : ["big"", linear", "logistic"],
+        "_P"  : ["about", "near"],
+        "_V"  : ["learns", "trains", "tests", "is"]}
 
 
+def is_terminal(token):
+    return token[0] != '_'
+
+def expand(grammar, tokens):
+    for i, token in enumerate(tokens):
+        # skip over terminals
+        if is_terminal(token):
+            # continue in next for iteration
+            continue
+
+        # if not a terminal we need to choose a replacement
+        replacement = random.choice(grammar[token])
+
+        if is_terminal(replacement):
+            tokens[i] = replacement
+        else:
+            # splice the non-terminal token list  into tokens
+            tokens = tokens[:i] + replacement.split() + tokens[(i+1):]
+        
+        # now call expand on this new list of tokens 
+        return expand(grammar, tokens)
+
+    # if we get here they are all terminals and we return tokens
+    return tokens
+
+if __name__ == '__main__':
+    
+    print '\n' 
+    print "BIGRAM SENTENCE --------------"
+    print bigram_sentence_generator()
+    print '\n'
+
+    print "TRIGRAM SENTENCE -------------"
+    print trigram_sentence_generator()
+    print '\n'
+
+    print "GRAMMARS SENTENCE ------------"
+    print expand(grammar, ["_S"])
+    print '\n'
