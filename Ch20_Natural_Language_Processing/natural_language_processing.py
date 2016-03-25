@@ -12,10 +12,11 @@ place.
 """
 
 from bs4 import BeautifulSoup
-from collections import defaultdict
+from collections import defaultdict, Counter
 import random
 import requests
 import re
+from tabulate import tabulate
 
 # Website of the document
 url = "http://radar.oreilly.com/2010/06/what-is-data-science.html"
@@ -170,6 +171,29 @@ def expand(grammar, tokens):
 # 4. By iterating the above we end up with a joint sample from th e
 # topic-word distribution and document-topic distribution
 
+
+documents = [
+    ["Hadoop", "Big Data", "HBase", "Java", "Spark", "Storm", "Cassandra"],
+    ["NoSQL", "MongoDB", "Cassandra", "HBase", "Postgres"],
+    ["Python", "scikit-learn", "scipy", "numpy", "statsmodels","pandas"],
+    ["R", "Python", "statistics", "regression", "probability"],
+    ["machine learning", "regression", "decision trees", "libsvm"],
+    ["Python", "R", "Java", "C++", "Haskell", "programming languages"],
+    ["statistics", "probability", "mathematics", "theory"],
+    ["machine learning", "scikit-learn", "Mahout", "neural networks"],
+    ["neural networks", "deep learning", "Big Data",
+    "artificial intelligence"],
+    ["Hadoop", "Java", "MapReduce","Big Data"],
+    ["statistics", "R", "statsmodels"],
+    ["C++", "deep learning", "artificial intelligence","probability"],
+    ["pandas", "R", "Python"],
+    ["databases", "HBase", "Postgres", "MySQL", "MongoDB"],
+    ["libsvm", "regression", "support vectormachines"]
+    ]
+
+# try to locate K=4 topics
+K = 4
+
 def sample_from(weights):
     """ returns an index i, with probability weights[i]/sum(weights) """
     total = sum(weights)
@@ -202,7 +226,7 @@ W = len(distinct_words)
 D = len(documents)
 
 ## Define Conditional Probability Functions ##
-def p_topic_given_document(topic, d, alpha=0.1)
+def p_topic_given_document(topic, d, alpha=0.1):
     """ fraction of words in document d assigned to topic plus smoothing """
     # smoothing ensures every word has a non-zero chance of being chosen for
     # any topic
@@ -212,7 +236,7 @@ def p_topic_given_document(topic, d, alpha=0.1)
 def p_word_given_topic(word, topic, beta=0.1):
     """ fraction of words assigned to a topic plus some smoothing """
     return ((topic_word_counts[topic][word] + beta)/
-            (topic_counts[topic] + W * beta)
+            (topic_counts[topic] + W * beta))
 
 # create the weights for updating the topics 
 def topic_weight(d, word, k):
@@ -222,6 +246,43 @@ def topic_weight(d, word, k):
 # perform weighted sample from the topics
 def choose_new_topic(d, word):
     return sample_from([topic_weight(d, word, k) for k in range(K)])
+
+# Implementation #
+##################
+# Initialiaze a random topic for each word in each document
+random.seed(0)
+document_topics = [[random.randrange(K) for word in document] for
+                    document in documents]
+
+for d in range(D):
+    for word, topic in zip(documents[d], document_topics[d]):
+        document_topic_counts[d][topic] += 1
+        topic_word_counts[topic][word] += 1
+        topic_counts[topic] += 1
+
+# our goal is to get a joint sample from the conditional probabilities
+# defined earlier we do this using Gibbs sampling.
+for iter in range(1000):
+    for d in range(D):
+        for i, (word,topic) in enumerate(zip(documents[d],
+                                             document_topics[d])):
+
+            # remove this word/topic so it doesn't influence weights
+            document_topic_counts[d][topic] -= 1
+            topic_word_counts[topic][word] -= 1
+            topic_counts[topic] -= 1
+            document_lengths[d] -= 1
+
+            # choos a new topic based on the weights
+            new_topic = choose_new_topic(d, word)
+            document_topics[d][i] = new_topic
+
+            # now add it back into the counts
+            document_topic_counts[d][new_topic] += 1
+            topic_word_counts[new_topic][word] += 1
+            topic_counts[new_topic] += 1
+            document_lengths[d] += 1
+
 
 
 
@@ -241,24 +302,12 @@ if __name__ == '__main__':
     print '\n'
 
     print "TOPIC MODELING ---------------"
-    documents = [
-    ["Hadoop", "Big Data", "HBase", "Java", "Spark", "Storm", "Cassandra"],
-    ["NoSQL", "MongoDB", "Cassandra", "HBase", "Postgres"],
-    ["Python", "scikit-learn", "scipy", "numpy", "statsmodels","pandas"],
-    ["R", "Python", "statistics", "regression", "probability"],
-    ["machine learning", "regression", "decision trees", "libsvm"],
-    ["Python", "R", "Java", "C++", "Haskell", "programming languages"],
-    ["statistics", "probability", "mathematics", "theory"],
-    ["machine learning", "scikit-learn", "Mahout", "neural networks"],
-    ["neural networks", "deep learning", "Big Data",
-    "artificial intelligence"],
-    ["Hadoop", "Java", "MapReduce","Big Data"],
-    ["statistics", "R", "statsmodels"],
-    ["C++", "deep learning", "artificial intelligence","probability"],
-    ["pandas", "R", "Python"],
-    ["databases", "HBase", "Postgres", "MySQL", "MongoDB"],
-    ["libsvm", "regression", "support vectormachines"]
-    ]
 
-    # try to locate K=4 topics
-    K = 4
+    # print out the topics
+    table = []
+    for k, word_counts in enumerate(topic_word_counts):
+        for word, count in word_counts.most_common():
+            if count > 0:
+                table.append([k, word, count])
+    print tabulate(table, headers=['Topic', 'Word', 'Count'])
+
