@@ -1,5 +1,8 @@
 """
-
+In this module, we explore graph networks. I will use the data provided in
+the chapter but I have decided to write my own implementation because the
+implementation of breadth first search was really poorly done. I am using
+networkx package to make some nice plots of the analyzed networks.
 """
 
 # Perform plotting imports and networkx to create a network
@@ -26,8 +29,8 @@ for user in users:
     user["friends"] =[]
 
 for i,j in friendships:
-    users[i]["friends"].append(users[j]['id'])
-    users[j]["friends"].append(users[i]['id'])
+    users[i]["friends"].append(users[j]["id"])
+    users[j]["friends"].append(users[i]["id"])
 
 
 G = nx.Graph()
@@ -43,56 +46,55 @@ positions = nx.get_node_attributes(G,'pos')
 G.add_edges_from(friendships)
 # draw the graph placing the nodes at the positions
 nx.draw(G,positions)
-plt.show()i
+plt.show()
 
-def shortest_paths_from(from_user):
+def bfs_paths(graph, start_node, end_node):
+    """ computes all the paths between the start_node and end_node in the
+    users graph  using breath first search algorithm """
+    # create a queue and initialize it to start at the start node
+    queue = [(start_node, [start_node])]
+    # keep a list of the nodes we have visited
+    visited = []
     
-    # a path will be represented as a list of users
-    
-    # a dictionary from "user_id" to *all* shortest paths to that user, if
-    # there are multiple shortest paths it will contain them all
-    shortest_paths_to = {from_user["id"]: [[]]}
+    while queue:
+        # get the first node, path pair
+        (node, path) = queue.pop(0)
+        # get the adjacent nodes (in this case friends)
+        for next in graph[node]["friends"]:
+            # make sure we haven't yet visited these nodes
+            if next not in visited:
+                # if one of the adjacents is our end_node then we yield it.
+                # Note this will yield the shortest path first but there may
+                # be multiple shortest paths
+                if next == end_node:
+                    yield path + [next]
+                else:
+                    # otherwise add the adjacent node and appended path to
+                    # the queue
+                    queue.append((next, path + [next]))
+            # update the nodes we have visited
+            visited.append(node)
 
-    # a queue of (previous user, next user) that we need to explore. It will
-    # start out with all pairs (from_user, friend_from_user). Think of these
-    # as little path segements.
-    frontier = deque((from_user, friend) 
-                      for friend in from_user["friends"])
+def shortest_paths(graph, start_node, end_node):
+    """ returns the shortest paths bewtween start and end_nodes in graph """
+    # get all the paths between the start and end node
+    paths = list(bfs_paths(graph, start_node, end_node))
+    # calculate the shortest length
+    min_path_length = min([len(row) for row in paths])
+    # filter for only shortest paths
+    shortest_paths = [path for path in paths if len(path) <=min_path_length]
+    return shortest_paths
 
-    # Continue until we exhaust the queue
-    while edges:
+print shortest_paths(users,0,4)
+
+# now we are ready to calculate for each node in our network the shortest
+# paths to all other nodes in the network
+for user in users:
+    user["shortest_paths"] = []
+
+for start_node, _ in enumerate(users):
+    for end_node, _ in enumerate(users):
+        if start_node != end_node:
+            users[start_node]['shortest_paths'].append(shortest_paths(users,
+            start_node, end_node))
         
-        # get and remove the first user in the queue
-        prev_user, user = edges.popleft()
-        user_id = user["id"]
-
-        # the shortest path from the user to the previous user is just the
-        # previous user id path. Note there might be several previous 
-        # users so we add them all to new_paths_to_user
-        paths_to_prev_user = shortest_paths_to[prev_user["id"]])
-        new_paths_to_user = [path + [user_id] 
-                                for path in paths_to_prev_user]
-
-        # it is possible that we already have the shortest path
-        old_paths_to_user = shortest_paths_to.get(user_id,[])
-
-        # what is the shortest path to this user we have seen so far
-        if old_paths_to_user:
-            min_path_length = len(old_paths_to_user[0])
-        else:
-            min_path_length = float('inf')
-
-        # only keep paths that aren't too long and are new
-        new_paths_to_user = [path for path in new_paths_to_user
-                             if len(path) <= min_path_length
-                             and path not in old_paths_to_user]
-        
-        # This handles the case of multiple shortest paths to the user by
-        # adding the new path in 
-        shortest_paths_to[user_id] = old_paths_to_user + new_paths_to_user
-
-        # add never-before-seen neighbors to the frontier
-        edges.extend((user, friend) for friend in user['friends']
-                         if friend not in shortest_paths_to)
-
-        return shortest_paths_to
