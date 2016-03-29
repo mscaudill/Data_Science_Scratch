@@ -3,6 +3,8 @@ In this module, we explore graph networks. I will use the data provided in
 the chapter but I have decided to write my own implementation because the
 implementation of breadth first search was really poorly done. I am using
 networkx package to make some nice plots of the analyzed networks.
+Specifically we will try to identify the centrality or importance of certain
+nodes in our network.
 """
 
 # Perform plotting imports and networkx to create a network
@@ -10,7 +12,8 @@ from matplotlib import pyplot as plt
 from collections import deque
 import networkx as nx
 
-
+# Define a little network of users with an id, a name and a node position
+# for plotting
 users = [   { "id": 0, "name": "Hero",  'pos': (0,0) },
             { "id": 1, "name": "Dunn",  'pos': (1,-1) },
             { "id": 2, "name": "Sue",   'pos': (1,1) },
@@ -22,9 +25,11 @@ users = [   { "id": 0, "name": "Hero",  'pos': (0,0) },
             { "id": 8, "name": "Kate",  'pos': (6,0) },
             { "id": 9, "name": "Klein", 'pos': (7,0)  }]
 
+# define the edges between the users as friendships 
 friendships = [(0,1),(0,2),(1,2),(1,3),(2,3),(3,4),(4,5),(5,6),(5,7),
                (6,8),(7,8),(8,9)]
 
+# add the friends id to each user
 for user in users:
     user["friends"] =[]
 
@@ -32,7 +37,7 @@ for i,j in friendships:
     users[i]["friends"].append(users[j]["id"])
     users[j]["friends"].append(users[i]["id"])
 
-
+# Create a graph object to plot to
 G = nx.Graph()
 # For each user add them to the graph object with a 'position' attribute
 for user in users:
@@ -47,6 +52,12 @@ G.add_edges_from(friendships)
 # draw the graph placing the nodes at the positions
 nx.draw(G,positions)
 plt.show()
+
+# Breadth First Search Algorithm #
+##################################
+# We want to determine the shortest path(s) between any two nodes in our
+# network and then count how many paths pass through each node. This is
+# "betweeness centrality" metric.
 
 def bfs_paths(graph, start_node, end_node):
     """ computes all the paths between the start_node and end_node in the
