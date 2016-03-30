@@ -8,9 +8,11 @@ nodes in our network.
 """
 
 # Perform plotting imports and networkx to create a network
+import networkx as nx
 from matplotlib import pyplot as plt
 from collections import deque
-import networkx as nx
+from DS_Scratch.Ch21_Network_Analysis import eigenvector_algorithm as eva
+from DS_Scratch.Ch4_Linear_Algebra import make_matrix
 
 # Define a little network of users with an id, a name and a node position
 # for plotting
@@ -144,4 +146,38 @@ positions = nx.get_node_attributes(G,'pos')
 G.add_edges_from(friendships)
 # draw the graph placing the nodes at the positions
 nx.draw(G,positions,node_size=sizes)
+
+# Eigenvector-Centrality #
+##########################
+# We will use the friendships to establish an adjacency matrix which
+# represents whether there is a friendship (edge) between every pair of
+# users. Thus the matrix will be square. The eigenvectors from a basis set
+# for this matrix one per node in the network. The eigenvalues represent how
+# many connections are arriving at that node and how well connected that
+# node is to other nodes with lots of connections.
+
+def entry_fn(i, j):
+    """ returns a 1 if a friendship exist b/w i,j or j,i """
+    return 1 if (i, j) in friendships or (j,i) in friendships else 0
+
+n = len(users)
+# make the adjacency matrix using entry_fn
+adjacency_matrix = make_matrix(n, n, entry_fn)
+
+# now compute the eigenvalues
+eigenvalues, _ = eva.find_eigenvector(adjacency_matrix)
+# scale up the eigenvalues (default node size in networkx is 300)
+sizes = [1000*eigenvalue for eigenvalue in eigenvalues]
+
+# Make a plot using the eigenvalues as the node sizes
+fig = plt.figure(3)
+fig.suptitle("Eigenvalue-Centrality of User-Friends Network",fontsize=14, 
+              fontweight='bold')
+# get the nodes and attributes dictionary
+positions = nx.get_node_attributes(G,'pos')
+# add the friendships as edges to the graph
+G.add_edges_from(friendships)
+# draw the graph placing the nodes at the positions
+nx.draw(G,positions,node_size=sizes)
+
 plt.show()
