@@ -1,10 +1,10 @@
 """
 In this module, we explore graph networks. I will use the data provided in
-the chapter but I have decided to write my own implementation because the
-implementation of breadth first search was really poorly done. I am using
-networkx package to make some nice plots of the analyzed networks.
-Specifically we will try to identify the centrality or importance of certain
-nodes in our network.
+the chapter but I have decided to write my own implementation of the
+breadth first search algorithm. I am using networkx package to make some 
+nice plots of the analyzed networks. Specifically we will try to identify 
+the centrality or importance of certain nodes in our network using the
+Betweeness, Eigenvector and Page rank metrics.
 """
 
 # Perform plotting imports and networkx to create a network
@@ -40,14 +40,16 @@ for i,j in friendships:
     users[i]["friends"].append(users[j]["id"])
     users[j]["friends"].append(users[i]["id"])
 
+# Plot of the User-Friends Network #
+####################################
 # Create a graph object to plot to
 G = nx.Graph()
 # For each user add them to the graph object with a 'position' attribute
 for user in users:
     G.add_node(user["id"],pos=user['pos'])
 
-fig = plt.figure(1)
-fig.suptitle("User-Friends Network",fontsize=14, fontweight='bold')
+fig1 = plt.figure(1)
+fig1.suptitle("User-Friends Network",fontsize=14, fontweight='bold')
 # get the nodes and attributes dictionary
 positions = nx.get_node_attributes(G,'pos')
 # add the friendships as edges to the graph
@@ -138,8 +140,8 @@ for start_node,_ in enumerate(users):
 # is normally 300, what matters here is size difference between nodes
 sizes = [50*user['betweeness_centrality'] for user in users]
 
-fig = plt.figure(2)
-fig.suptitle("Betweeness-Centrality of User-Friends Network",fontsize=14, 
+fig2 = plt.figure(2)
+fig2.suptitle("Betweeness-Centrality of User-Friends Network",fontsize=14, 
               fontweight='bold')
 # get the nodes and attributes dictionary
 positions = nx.get_node_attributes(G,'pos')
@@ -171,8 +173,8 @@ eigenvalues, _ = eva.find_eigenvector(adjacency_matrix)
 sizes = [1000*eigenvalue for eigenvalue in eigenvalues]
 
 # Make a plot using the eigenvalues as the node sizes
-fig = plt.figure(3)
-fig.suptitle("Eigenvalue-Centrality of User-Friends Network",fontsize=14, 
+fig3 = plt.figure(3)
+fig3.suptitle("Eigenvalue-Centrality of User-Friends Network",fontsize=14, 
               fontweight='bold')
 # get the nodes and attributes dictionary
 positions = nx.get_node_attributes(G,'pos')
@@ -207,8 +209,8 @@ DG = nx.DiGraph()
 for user in users:
     DG.add_node(user["id"],pos=user['pos'])
 
-fig = plt.figure(4)
-fig.suptitle("Endorsement Network",fontsize=14, fontweight='bold')
+fig4 = plt.figure(4)
+fig4.suptitle("Endorsement Network",fontsize=14, fontweight='bold')
 # get the nodes and attributes dictionary
 positions = nx.get_node_attributes(DG,'pos')
 # add the endorsement as directed edges to the graph
@@ -219,12 +221,76 @@ nx.draw(DG,positions)
 # find the most endorsed users
 endorsements_by_id = [(user["id"], len(user["endorsed_by"])) 
                        for user in users]
-print endorsements_by_id
 # now sort them
 sorted(endorsements_by_id, key=itemgetter(1))
 
 # Page Rank Algorithm #
 #######################
+# In addition to looking at the number of connections between nodes to
+# assess centrality we can consider who it is that is making the
+# connections. Connections from nodes with lots of connections should be
+# wieghted somehow more than connections from less connected nodes. In terms
+# of webpages this would allow a page rank to be assigned to webpages to
+# determine which ones link to another webpage.
 
+# A simplified version of this is as follows:
+# 1. There is a total of 1.0 (100%) Page rank in the network
+# 2. Initially this page rank is equally distributed among the nodes
+# 3. At each step a large fraction of each nodes page rank is distributed
+# evenly among its outgoing links
+# 4. A each step the remainder of each nodes page rank is distributed evenly
+# among all the nodes
 
-#plt.show()
+def page_rank(users, damping = 0.85, num_iters = 100):
+    """ ranks users based on the number of ranked connections. A ranked
+    connection is when the user recieves lots of connections from other
+    users with lots of connections.  """   
+    # initially distribute the page rank evenly among the nodes
+    num_users = len(users)
+    # make a dict keyed on user_id and value of rank
+    pr = {user["id"] : 1/float(num_users) for user in users}
+
+    # assign the small fraction of rank that each node gets each iteration
+    base_pr = (1-damping) / float(num_users)
+
+    for _ in range(num_iters):
+        next_pr = { user["id"] : base_pr for user in users }
+        for user in users:
+            # distribute the page rank among the out going links
+            links_pr = pr[user["id"]] * damping
+            # for each endorsee of this user add a frac of the links_pr
+            for endorsee in user['endorses']:
+                next_pr[endorsee] += links_pr / len(user['endorses'])
+        
+        # reiterate with new page rank
+        pr = next_pr
+    return pr
+
+fig5 = plt.figure(5)
+fig5.suptitle("Page Rank of Endorsement Network",fontsize=14, 
+              fontweight='bold')
+              
+# Create a directed graph object to plot to
+pr_DG = nx.DiGraph()
+
+# For each user add them to the graph object with a 'position' attribute
+for user in users:
+    pr_DG.add_node(user["id"],pos=user['pos'])
+
+# get the page ranks for each user (returns a dict)
+page_ranks = page_rank(users)
+
+# scale up the sizes (default is 300)
+page_rank_sizes = [10000*page_ranks[id] for id in range(len(users))]
+
+# get the nodes and attributes dictionary
+positions = nx.get_node_attributes(pr_DG,'pos')
+
+# add the endorsement as directed edges to the graph
+pr_DG.add_edges_from(endorsements)
+
+# draw the graph placing the nodes at the positions with page ranks as node
+# size
+nx.draw(pr_DG,positions,node_size=page_rank_sizes)
+
+plt.show()
