@@ -13,6 +13,7 @@ from matplotlib import pyplot as plt
 from collections import deque
 from DS_Scratch.Ch21_Network_Analysis import eigenvector_algorithm as eva
 from DS_Scratch.Ch4_Linear_Algebra import make_matrix
+from operator import itemgetter
 
 # Define a little network of users with an id, a name and a node position
 # for plotting
@@ -180,4 +181,50 @@ G.add_edges_from(friendships)
 # draw the graph placing the nodes at the positions
 nx.draw(G,positions,node_size=sizes)
 
-plt.show()
+# Directed Graphs and Page Rank Algorithm #
+###########################################
+# list of tuple endorsements between users in our network. They form
+# directed edges
+endorsements = [(0,1),(1,0),(0,2),(2,0),(1,2),
+                (2,1),(1,3),(2,3),(3,4),(5,4),
+                (5,6),(7,5),(6,8),(8,7),(8,9)]
+
+# add for each user who they endorse and who endorses them
+for user in users:
+    # add user endorsments
+    user["endorses"] = []
+    # add user_endorsed_by
+    user["endorsed_by"] = []
+
+for start_node, end_node in endorsements:
+    users[start_node]["endorses"].append(end_node)
+    users[end_node]["endorsed_by"].append(start_node)
+
+
+# Create a directed graph object to plot to
+DG = nx.DiGraph()
+# For each user add them to the graph object with a 'position' attribute
+for user in users:
+    DG.add_node(user["id"],pos=user['pos'])
+
+fig = plt.figure(4)
+fig.suptitle("Endorsement Network",fontsize=14, fontweight='bold')
+# get the nodes and attributes dictionary
+positions = nx.get_node_attributes(DG,'pos')
+# add the endorsement as directed edges to the graph
+DG.add_edges_from(endorsements)
+# draw the graph placing the nodes at the positions
+nx.draw(DG,positions)
+
+# find the most endorsed users
+endorsements_by_id = [(user["id"], len(user["endorsed_by"])) 
+                       for user in users]
+print endorsements_by_id
+# now sort them
+sorted(endorsements_by_id, key=itemgetter(1))
+
+# Page Rank Algorithm #
+#######################
+
+
+#plt.show()
