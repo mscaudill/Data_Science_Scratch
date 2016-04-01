@@ -9,7 +9,7 @@ look at the similarity in interest and generating suggestions based on the
 aggregated interest. This is called item-based collaborative filtering.
 """
 from collections import Counter
-from Ch4_Linear_Algebra import dot_product, magnitude
+from DS_Scratch.Ch4_Linear_Algebra import dot_product, magnitude
 
 # Load Users Interests #
 ########################
@@ -54,19 +54,38 @@ def cosine_similarity(v,w):
 # alphabetical order since sort is called
 def get_unique_interest(users_data):
     """ gets a sorted list of unique interest in users_data """
-    return sorted(list({interest for user_interests in user_data
+    return sorted(list({interest for user_interests in users_data
                         for interest in user_interests}))
 
 # Now we want to produce an interest vector for each user. It will be binary
 # a 0 for no interest and 1 for true interest at the index corresponding to
 # that particular interest
-def make_user_interest_vector(user_interests):
+def make_user_interest_vector(user_interests, users_data):
     """ makes a binary vector of interest for user """
     # get the unique interests
     unique_interests = get_unique_interest(users_data)
 
     return [1 if interest in user_interests else 0 
             for interest in unique_interests]
+
+def make_user_interest_matrix(users_data):
+    """ returns a matrix of all user_interest vectors """
+    user_interest_matrix =[]
+    for user in users_data:
+        # For each user make the vector of interest
+        user_interest_vector = make_user_interest_vector(user, users_data)
+        # append the vector to the matrix
+        user_interest_matrix.append(user_interest_vector)
+    return user_interest_matrix
+
+def user_cosine_similarities(users_data):
+    """ Computes cosine simiilarity of all users in user interest matrix """
+    # get the user interest matrix
+    user_interest_matrix = make_user_interest_matrix(users_data)
+    # compute the cosine similarity between all rows
+    return [[cosine_similarity(interest_vector_i, interest_vector_j)
+             for interest_vector_j in user_interest_matrix]
+             for interest_vector_i in user_interest_matrix]
 
 if __name__ == "__main__":
 
@@ -80,5 +99,9 @@ if __name__ == "__main__":
     
     # print out user1 recommendations
     print most_popular_new_interests(users_interests[1], users_interests)
+
+    # print user similarity for two sample users
+    user_similarities = user_cosine_similarities(users_interests)
+    print user_similarities[0][8]
 
 
