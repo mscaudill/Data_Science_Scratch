@@ -8,8 +8,9 @@ called 'User-based collaborative filtering'. The third approach will be to
 look at the similarity in interest and generating suggestions based on the
 aggregated interest. This is called item-based collaborative filtering.
 """
-from collections import Counter
+from collections import Counter, defaultdict
 from DS_Scratch.Ch4_Linear_Algebra import dot_product, magnitude
+from operator import itemgetter
 
 # Load Users Interests #
 ########################
@@ -87,21 +88,75 @@ def user_cosine_similarities(users_data):
              for interest_vector_j in user_interest_matrix]
              for interest_vector_i in user_interest_matrix]
 
+def most_similar_users_to(user_id):
+    """ sorts the users based on cosine similarity to the user with
+    user_id """
+    # get all possible pair partners to user_id. exclude those with 0
+    # similarity
+
+    # first get the cosine similarities between all users
+    similarities =  user_cosine_similarities(users_interests)
+    # now get all possible non-zero pairs
+    pairs = [(other_user_id, similarity) 
+              for other_user_id, similarity in
+                enumerate(similarities[user_id]) 
+              if user_id != other_user_id and similarity > 0]
+    # tuple sorting is by first el first which is other_user_id so we must
+    # sort by 2nd el of tuple
+    return sorted(pairs, key=itemgetter(1), reverse=True)
+
+def user_based_suggestions(user_id, include_current_interests=False):
+    """ makes suggestions to user with id user_id based on their cosine
+    similarity with other users """
+    suggestions = defaultdict(float)
+    # go through the tuple list of user_ids and similarity of most_similar
+    # users_to and pool the interest of each other_user_id into a defdict
+    for other_user_id, similarity in most_similar_users_to(user_id):
+        for interest in users_interests[other_user_id]:
+            suggestions[interest] += similarity
+
+    # convert the interest into a sorted list sorting by the number of times
+    # that suggestion occurs
+    suggestions = sorted(suggestions.items(), key=itemgetter(1), 
+                         reverse=True)
+
+    # possibly exclude from suggestions interest that already belong to
+    # user_ids interest list
+    if include_current_interests:
+        return suggestions
+    else:
+        return [(suggestion, weight) for suggestion, weight in suggestions
+                if suggestion not in users_interests[user_id]]
+
+
 if __name__ == "__main__":
 
     # Popularity Recommendation #
     #############################
-
+    print "Popularity Base Recommendations--------------------------------"
     # get the interest ordered by popularity
     popular_interests = count_interests(users_interests)
     # Interest by popularity
-    #print popular_interests
+    print popular_interests
     
     # print out user1 recommendations
+    print "To user #1 we recommend..."
     print most_popular_new_interests(users_interests[1], users_interests)
-
+    
+    print "\n"
+    
+    print "User-Based Similarity Recommendations--------------------------"
     # print user similarity for two sample users
     user_similarities = user_cosine_similarities(users_interests)
+    print "User #1 to User #8 similarity is..."
     print user_similarities[0][8]
+
+    # print the most similar users to user 0
+    print "Ordered User-Similarity to User 0..."
+    print most_similar_users_to(0)
+
+    # print the user suggestions for user_id[0]
+    print "We recommend to user 0 the following..."
+    print user_based_suggestions(0)
 
 
