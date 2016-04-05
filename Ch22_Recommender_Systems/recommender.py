@@ -128,23 +128,117 @@ def user_based_suggestions(user_id, include_current_interests=False):
         return [(suggestion, weight) for suggestion, weight in suggestions
                 if suggestion not in users_interests[user_id]]
 
+# Item-Based Collaborative Filtering #
+######################################
+# As the number of possible interest increases (i.e. the num dimensions of
+# our vector increases) it becomes less and less likely that any two vectors
+# will be very similar. In high D spaces vectors tend to be very far apart
+# (see curse of dimensionality sec). So another method for making
+# suggestions to users is to do item-based collaborative filtering. In this
+# approach we compute the similarity between interests rather than users and
+# make recommendations from a pool of similar interest.
+
+# first we will transpose the user_interests_matrix so that rows correspond
+# to interests and cols correspond to users
+def transpose_user_interests():
+    # make the user_interests matrix
+    user_interests_matrix = make_user_interest_matrix(users_interests)
+    # get the unique interests
+    unique_interests = get_unique_interest(users_interests)
+    # perform the transpose so that now we have a matrix where each row is
+    # an interest and the cols are a 0 or 1 for each users index
+    interest_user_matrix = [[user_interest_vector[j]
+                        for user_interest_vector in user_interests_matrix]
+                        for j,_ in enumerate(unique_interests)]
+
+    return interest_user_matrix
+
+# now we compute the similarities between the interest
+def interests_similarity():
+    """ computes the similarity between interests """
+    # first get the interest user matrix
+    interests_user_matrix = transpose_user_interests()
+
+    # compute the cosine similarities between the interest vectors
+    interest_similarities = [
+                        [cosine_similarity(user_vector_i, user_vector_j)
+                        for user_vector_j in interests_user_matrix]
+                        for user_vector_i in interests_user_matrix]
+    
+    return interest_similarities
+
+# now we can find the most similar interest to each interest with
+def most_similar_interest_to(interest_id):
+    """ orders the interest in terms of cosine similarity to interest of
+    interest_id """
+
+    # Get the interest similarities and pull ot the list for the interest we
+    # want (interest_id)
+    interest_similarities = interests_similarity()
+    similarities = interest_similarities[interest_id]
+
+    # get the unique interests
+    unique_interests = get_unique_interest(users_interests) 
+    
+    # get the pairs of unique interest and similarity 
+    pairs = [(unique_interests[other_interest_id], similarity)
+              for other_interest_id, similarity in enumerate(similarities)
+              if interest_id != other_interest_id and similarity > 0]
+    
+    # return the sorted tuples from largest to smallest similarity
+    return sorted(pairs,key=itemgetter(1), reverse=True)
+
+# Now that we have a list and rank of interest similar to a given interest
+# we can make recommendations to the user 
+def item_based_recommendations(user_id, include_current_interest=False):
+    """ uses the users interest to determine similar interest to make
+    recommendation """
+
+    suggestions = defaultdict(float)
+    # get the user_interest_matrix
+    user_interest_matrix = make_user_interest_matrix(users_interests)
+    # get the user interest vector from the matrix
+    user_interest_vector = user_interest_matrix[user_id]
+    # now loop throught their interest and find similar interest
+    for interest_id, is_interested in enumerate(user_interest_vector):
+        if is_interested:
+            similar_interest = most_similar_interest_to(interest_id)
+            for interest, similarity in similar_interest:
+                suggestions[interest] += similarity
+
+    # sort the suggestions by weight (combined similarity)
+    suggestions = sorted(suggestions.items(), key=itemgetter(1),
+                         reverse=True)
+
+    # determine if we should include their already stated current interest
+    # in suggestions
+    if include_current_interest:
+        return suggestions
+    else:
+        return [(suggestion, weight) for suggestion, weight in suggestions
+                if suggestion not in users_interests[user_id]]
+
 
 if __name__ == "__main__":
 
     # Popularity Recommendation #
     #############################
-    print "Popularity Base Recommendations--------------------------------"
+    print "Popularity Based Recommendations-------------------------------"
     # get the interest ordered by popularity
     popular_interests = count_interests(users_interests)
     # Interest by popularity
     print popular_interests
     
+    print "\n"
+
     # print out user1 recommendations
     print "To user #1 we recommend..."
     print most_popular_new_interests(users_interests[1], users_interests)
     
     print "\n"
-    
+   
+    # User-Based Collaborative Filtering #
+    ######################################
     print "User-Based Similarity Recommendations--------------------------"
     # print user similarity for two sample users
     user_similarities = user_cosine_similarities(users_interests)
@@ -155,8 +249,20 @@ if __name__ == "__main__":
     print "Ordered User-Similarity to User 0..."
     print most_similar_users_to(0)
 
+    print "\n"
+
     # print the user suggestions for user_id[0]
     print "We recommend to user 0 the following..."
     print user_based_suggestions(0)
 
+    print "\n"
+
+    # Item-Based Collaborative Filtering #
+    ######################################
+    print "Item-Based Similarity Recommendations-------------------------"
+    print "The most similar interest to Big Data are..."
+    print most_similar_interest_to(0)
+    print "\n"
+    print "We recommend to user 0 the following..."
+    print item_based_recommendations(0)
 
