@@ -82,7 +82,101 @@ the value is missing """
 # SQL: TABLE QUERYING #
 #######################
 # We will now look at different SQL commands to query a single table in a
-# database named movies
+# database named movies. It has cols id, name, genre, year and imdb_rating
+# and has 220 rows of movies
+
+SELECT name, imdb_rating FROM movies;
+""" SELECT selects the columns name and imdb_rating from the movies table
+returning a table with cols name and imdb_rating for all 220 movies """
+
+SELECT DISTINCT genre FROM movies;
+""" SELECT DISTINCT returns unique values in the result set. So the result
+set list contains each genere present in the movies table only once. Here
+SELECT DISTINCT is a clause that retrieves from the genre column all unique
+values in the movies table. Performing good filtering is an essential part
+of SQL. """
+
+SELECT * FROM movies WHERE imdb_rating > 8;
+""" This statement SELECTS every row FROM movies table WHERE the imdb_rating
+column is greater than 8. It is another example of filtering. Other
+mathematical operations like > used in SQL are =, !=, >, <, >=, <= """
+
+SELECT * FROM movies WHERE name LIKE 'se_en';
+""" LIKE is an operator that can be used with WHERE to compare similar
+values. Here we use like to compare two movies (seven and se7en) with the
+same name but are spelled differently. se_en has a wildcard _ character that
+means you can substitute any character without breaking the pattern. % is
+another wildcard character. """
+
+SELECT * FROM movies WHERE name LIKE '%man';
+""" The % is a wildcard that filters the result set to only movies with
+names ending in 'man'. Similarly 'A%' will filter the result set to only
+inlcude names starting with an 'A', note 'A%' would filter out 'A Beautiful
+Mind' because there is a space. % is refering to a alphanumeric character
+"""
+
+SELECT * FROM movies WHERE name BETWEEN 'A' AND 'J';
+""" BETWEEN filters the result set to only include movies with names BETWEEN
+'A' and 'J'. I find it interesting that SQL knows this means 'starts with'
+A. This would include 'A beautiful mind' , 'Air Force One' etc...Note it
+does not include movies starting with J only upto J's. """
+
+SELECT * FROM movies WHERE year BETWEEN 1990 AND 2000;
+""" We can also use BETWEEN for integer data type """
+
+SELECT * FROM movies WHERE year BETWEEN 1990 AND 2000 AND genre = 'Comedy';
+""" The AND operator allows us to combine multiple filter conditions. Here
+year BETWEEN 1990 AND 2000 is the first clause and genre = 'Comedy' is the
+second clause. Both conditions must be true for the row to be included """
+
+SELECT * FROM movies WHERE genre = 'Comedy' OR year > 1980;
+""" OR is another operator that can be used with WHERE to filter results. If
+either WHERE clause is true the row is included """
+
+SELECT * FROM movies ORDER BY imdb_rating DESC;
+""" ORDER BY indicates you want to sort the result setby a particular column
+either alphabetically or numerically. DESC is a keyword used with ORDER BY
+to sort the results in DESCending order."""
+
+SELECT * FROM movies ORDER BY imdb_rating ASC LIMIT 3;
+""" LIMIT is a clause that lets you specify the maximum number of rows to
+return. """
+
+# SQL: AGGREGATE FUNCTIONS #
+############################
+# Aggregate functions compute a single result from a set of input values.
+# For instance we can average all the values of a particular column. Here we
+# are given a table of fake_apps with cols: id, name, category, downloads
+# and price. There are 200 rows in the table
+
+# Count #
+SELECT COUNT(*) FROM fake_apps
+""" COUNT is a function that takes the name of a column as an argument and
+counts the number of rows where the col is not NULL. Here we count every row
+so we pass * as an argument"""
+
+SELECT COUNT(*) FROM fake_apps WHERE price = 0;
+""" This wil count the rows where the price column is 0 """
+
+SELECT price, COUNT(*) FROM fake_apps GROUP BY price;
+""" GROUP BY is a clause in SQL that is only used with aggregate functions
+to arracnge identical data into groups. Here COUNT() is our agg function and
+price is the argument passed to GROUP BY. SQL will count the number of
+rows(apps) for each price in the table. We SELECT both price and COUNT(*) so
+the result set is organized into two columns"""
+
+SELECT SUM(downloads) FROM fake_apps;
+""" SUM is another aggregate function. Here we sum all values in the
+download column in the fake_apps table. """
+
+SELECT category, SUM(downloads) FROM fake_apps GROUP BY category;
+""" Here we GROUP BY category and then SUM the downloads for each category
+returning the category and sum """
+
+
+
+
+
 
 
 
