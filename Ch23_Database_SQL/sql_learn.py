@@ -149,6 +149,9 @@ return. """
 # are given a table of fake_apps with cols: id, name, category, downloads
 # and price. There are 200 rows in the table
 
+# FYI: Aggregate functions are so named because they aggregate values across
+# multiple rows to form a single value.
+
 # Count #
 SELECT COUNT(*) FROM fake_apps
 """ COUNT is a function that takes the name of a column as an argument and
@@ -164,7 +167,8 @@ to arracnge identical data into groups. Here COUNT() is our agg function and
 price is the argument passed to GROUP BY. SQL will count the number of
 rows(apps) for each price in the table. We SELECT both price and COUNT(*) so
 the result set is organized into two columns"""
-
+ 
+# Sum #
 SELECT SUM(downloads) FROM fake_apps;
 """ SUM is another aggregate function. Here we sum all values in the
 download column in the fake_apps table. """
@@ -173,9 +177,36 @@ SELECT category, SUM(downloads) FROM fake_apps GROUP BY category;
 """ Here we GROUP BY category and then SUM the downloads for each category
 returning the category and sum """
 
+# MAX #
+SELECT MAX(downloads) FROM fake_apps;
+""" MAX is an agg function that computes the maximum of a column """
 
+SELECT name, category, MAX(downloads) FROM fake_apps GROUP BY category;
+""" Groups the apps by category and then locates the name of the app with
+the most downloads in each category """
 
+# MIN #
+SELECT MIN(downloads) FROM fake_apps;
+""" MIN returns the minimum of a column """
 
+SELECT name, category, MIN(downloads) FROM fake_apps GROUP BY category;
+""" Groups the apps by category and then locates the name of the app with
+the least downloads in each category """
+
+# Average #
+SELECT AVG(downloads) FROM fake_apps;
+""" AVG returns the average of a column in our database table """
+
+SELECT price, AVG(downloads) FROM fake_apps GROUP BY price;
+""" AVG can be combined with GROUP BY to get averages between data sectioned
+GROUP BY parameters """
+
+SELECT price, ROUND(AVG(downloads),2) FROM fake_apps GROUP BY price;
+""" ROUND can be use to round numbers to arbitrary number of significant
+digits """
+
+# MULTIPLE TABLES #
+###################
 
 
 
