@@ -207,6 +207,89 @@ digits """
 
 # MULTIPLE TABLES #
 ###################
+# Tables in a database can be related to each other. For example a table of
+# music artists and a table of albums are related because each artists may
+# have many albums. SQL allows us to write queries that can combine data
+# from multiple tables that are related to each other. Assume we have a
+# table of albums already with the columns id, name, artist_id, year
+
+CREATE TABLE artists(id INTEGER PRIMARY KEY, name TEXT);
+""" CREATE TABLE is called to make an artist table that will be related to
+albums. The PRIMARY KEY is a unique row (record) identifier. It is literally
+an id value for a record. We will use this value to connect an artist to the
+albums they have produced in the albums table. By specifying the id column
+as the primary key, SQL makes sure (1) none of the values in the col are
+null and (2) each value in the col is unique. """
+
+SELECT * FROM artist WHERE id = 3; 
+""" SELECTS the artist with the id of 3. Remember id is the primary key """
+
+SELECT * FROM albums WHERE artist_id = 3;
+""" SELECTS all albums with an artist_id of 3. This links with the primary
+key of the artist table. Here artist_id is called a FOREIGN KEY. A foreign
+key is a column that contains the primary keys of another table connecting
+the rows of different tables. Unlike primary keys, foreign keys need not be
+unique and can be null. In summary the relationship between the artists and
+albums table is the id value of the artists."""
+
+# SELECT MULTIPLE TABLES: CROSS JOIN #
+SELECT albums.name, albums.year, artists.name FROM albums, artists;
+""" SELECT with mutiple table names separated by a ,. When querying more
+than one table tje column names need to be specified by
+table_name.column_name. This is called a CROSS JOIN. It simply lines up the
+columns from the tables although those columns are not related."""
+
+# MULTIPLE TABLES: INNER JOIN #
+SELECT * FROM albums
+    JOIN artists ON
+        albums.artist_id = artists.id;
+""" Lets break down this sql statement. 
+1. SELECT * specifies the cols our result set will have. We include
+   every colum in both tables here.
+2. FROM albums specifies the table we are querying
+3. JOIN artists ON specifies the type of join and the name of the second
+   table.
+4. albums.artist_id = artists.id is the join condition that describes how
+   the two tables are related to each other. SQL uses the FOREIGN KEY column
+   artist_id in the albums to match the primary key id in the artists table.
+   We now that it will only match with one row of artists table because the
+   id is a PRIMARY KEY
+"""
+
+# MULTIPLE TABLES: LEFT OUTER JOIN #
+SELECT * FROM albums
+    LEFT JOIN artist ON
+        albums.artist_id = artists.id;
+""" a LEFT OUTER JOIN does not require the join condition to be met, instead
+every row in the left table is returned in the result set and if the
+condition is not met NULL values are used to fill in the columns from the
+right table. Here the left table is albums and the right table is artist"""
+
+# MULTIPLE TABLES: AS KEYWORD #
+###############################
+SELECT
+    albums.name AS 'Album',
+    albums.year,
+    artists.name AS 'Artist'
+FROM
+    albums
+JOIN artists ON
+    albums.artist_id = artists.id
+WHERE
+    albums.year > 1980;
+
+""" The result set of this SQL query returns a table with columns Album,
+year and Artist. So As renames a column or table using an alias. It must be
+in single quotes. We do this sometimes because it can be confusing when the
+same name is used for columns in two different tables. In the artists albums
+case name is used as the artists name and album name so aliasing these makes
+sense. It is important to note that the column names in the original tables
+remain unchanged only the column names in the result set are aliased. """
+
+
+
+
+
 
 
 
