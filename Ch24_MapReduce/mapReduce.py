@@ -66,6 +66,7 @@ def word_count(documents):
     return [output for word, presence_list in collector.iteritems() 
             for output in wc_reducer(word, presence_list)]
 
+
 # mini-test
 print word_count(['data science', 'big data', 'science fun'])
 
@@ -97,4 +98,24 @@ def map_reduce(inputs, mapper, reducer):
     return [output for key, value_list in collector.iteritems()
             for output in reducer(key, value_list)]
 
+# with this framework we can abstract the types of mapper and reducer
+# functions. Previously the reducer simply summed the values list but we can
+# more generally write this using an aggregate function
 
+def reduce_values_with(aggregation_fn, key, value_list):
+    """ applies aggregation function to values yielding a (key,output)
+    pairs """
+    yield (key, aggregation_fn(value_list))
+
+def values_reducer(aggregation_fn):
+    """ turns an aggregation func that maps value_list -> output into a 
+    reducer mapping (key, value_list) -> (key, output) tuple """
+    return partial(reduce_values_with(aggregation_fn, key, value_list))
+
+# now for example we can write 
+sum_reducer = values_reducer(sum)
+max_reducer = values_reducer(max)
+min_reducer = values_reducer(min)
+count_distinct_reducer = values_reducer(lambda values_list:
+                                        len(set(values_list)))
+# and so on
