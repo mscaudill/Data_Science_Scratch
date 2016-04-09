@@ -68,3 +68,33 @@ def word_count(documents):
 
 # mini-test
 print word_count(['data science', 'big data', 'science fun'])
+
+""" So how would this work in practice? Imagine you had 100 machines. You
+could do the following
+1. Have each machine run wc_mapper on its set of documents producing (word,
+   presence) pairs.
+2. Give/Distribute those pairs to reducing machines making sure that pairs
+   with the same word keys all end up at the same machine.
+3. Have the reducing machines group the word, presence pairs into a dict
+   collector keyed on the word with presence_list as values.
+4. Run the reducer on each word, presence_list in the collector dict
+5. Return each (key,counts) pair from all machines. """
+
+# General MapReduce Approach #
+##############################
+# A more general framework of map reduce can be had by making minor
+# alterations to the word counting code.
+
+def map_reduce(inputs, mapper, reducer):
+    """ runs MapReduce method on inputs using mapper and reducer
+    functions"""
+    collector = defaultdict([list])
+
+    for input in inputs:
+        for key, value in mapper(input):
+            collector[key].append(value)
+
+    return [output for key, value_list in collector.iteritems()
+            for output in reducer(key, value_list)]
+
+
