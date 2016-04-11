@@ -7,6 +7,7 @@ data sets. There are essentially three steps to mapReduce.
 """
 from DS_Scratch.Ch13_Naive_Bayes.spam_classifier import tokenize
 from collections import defaultdict
+from datetime import date
 
 """ A basic starting example with mapReduce is to count words in documents.
 Below we will look at the classic way to do this (without mapReduce) and
@@ -119,3 +120,37 @@ min_reducer = values_reducer(min)
 count_distinct_reducer = values_reducer(lambda values_list:
                                         len(set(values_list)))
 # and so on
+
+# Example: Analyzing Status Updates #
+#####################################
+""" 
+Given a status updates, we can use map_reduce to address questions like.
+What days of the week are people most likely to be talking about data
+science? Here is an implementation...
+"""
+ status_updates = {'id':1, 'username':'mscaudill', 'text':'read any good data
+ science books lately?','created at': datetime.datetime(2013, 12,
+ 21,11,47,0, 'liked_by' : ['joelgrus','data_dude','data_gal']}
+
+# Given a status update like the one above can we figure out what day of the
+# week people talk most about data science? We can use the day of the week
+# as a key to a mapper and then the value as one for each update that falls
+# on that day. Then simply sum them up.
+
+def data_science_day_mapper(status_update):
+    """ yields a (day_of_week,1) tuple if a tweet appears discussing data
+    science on that day """
+    if 'data science' in status_update['text'].lower():
+        day_of_week = status_update.weekday()
+        yield (day_of_week, 1)
+
+# now call our general implementation of map_reduce using the sum_reducer
+data_science_days = map_reduce(status_updates, data_science_day_mapper,
+                               sum_reducer)
+
+""" Now consider a slightly more complicated example. For a given user what
+is the most common word in their status updates? To implement this we will
+key on the username and the values will be the word and counts for that
+word"""
+
+
