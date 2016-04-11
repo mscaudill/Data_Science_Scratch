@@ -5,9 +5,12 @@ data sets. There are essentially three steps to mapReduce.
 2. collect together all the pairs with identical keys into groups (dict obj)
 3. use a reducer function to produce outputs for each key
 """
-from DS_Scratch.Ch13_Naive_Bayes.spam_classifier import tokenize
 from collections import defaultdict
-from datetime import date
+from collections import Counter
+from functools import partial
+from datetime import datetime
+from DS_Scratch.Ch13_Naive_Bayes import tokenize
+import re
 
 """ A basic starting example with mapReduce is to count words in documents.
 Below we will look at the classic way to do this (without mapReduce) and
@@ -38,8 +41,12 @@ total count. """
 def wc_mapper(document):
     """ generator that yields (word,1) for each word in document. 1
     indicates word presence """
+    # note we are looking at the occurence of distinct words from each
+    # document, not the overall occurence of words. For example document 1
+    # may use the word 'it' ten times but this will be counted only once for
+    # document 1. The text seems to miss this point.
     for word in tokenize(document):
-        yield (word, 1)
+           yield (word, 1)
 
 """ 3. Write a reducer function that will produce outputs for each word. In
 this case we will simply sum the word_presence_list. """
@@ -90,7 +97,7 @@ could do the following
 def map_reduce(inputs, mapper, reducer):
     """ runs MapReduce method on inputs using mapper and reducer
     functions"""
-    collector = defaultdict([list])
+    collector = defaultdict(list)
 
     for input in inputs:
         for key, value in mapper(input):
@@ -111,7 +118,7 @@ def reduce_values_with(aggregation_fn, key, value_list):
 def values_reducer(aggregation_fn):
     """ turns an aggregation func that maps value_list -> output into a 
     reducer mapping (key, value_list) -> (key, output) tuple """
-    return partial(reduce_values_with(aggregation_fn, key, value_list))
+    return partial(reduce_values_with, aggregation_fn)
 
 # now for example we can write 
 sum_reducer = values_reducer(sum)
@@ -128,9 +135,11 @@ Given a status updates, we can use map_reduce to address questions like.
 What days of the week are people most likely to be talking about data
 science? Here is an implementation...
 """
- status_updates = {'id':1, 'username':'mscaudill', 'text':'read any good data
- science books lately?','created at': datetime.datetime(2013, 12,
- 21,11,47,0, 'liked_by' : ['joelgrus','data_dude','data_gal']}
+status_updates = [{'id':1, 
+                  'username':'mscaudill', 
+                  'text':'read any really really good data books lately?',
+                  'created_at': datetime(2013, 12, 21,11,47,0),
+                  'liked_by' : ['joelgrus','data_dude','data_gal']}]
 
 # Given a status update like the one above can we figure out what day of the
 # week people talk most about data science? We can use the day of the week
@@ -141,7 +150,7 @@ def data_science_day_mapper(status_update):
     """ yields a (day_of_week,1) tuple if a tweet appears discussing data
     science on that day """
     if 'data science' in status_update['text'].lower():
-        day_of_week = status_update.weekday()
+        day_of_week = status_update['created_at'].weekday()
         yield (day_of_week, 1)
 
 # now call our general implementation of map_reduce using the sum_reducer
@@ -153,4 +162,74 @@ is the most common word in their status updates? To implement this we will
 key on the username and the values will be the word and counts for that
 word"""
 
+def words_per_user_mapper(status_update):
+    """ yields (username, (word, 1)) tuple """
+    # note the tokenize function forms a set of distinct words, so here we
+    # are getting the most popular words across status updates. This is a
+    # choice we could have looked for the most popular word among all the
+    # words from every update.
+    user = status_update['username']
+    for word in tokenize(status_update['text'])
+        yield (user, (word, 1))
 
+def most_popular_word_reducer(user, words_and_counts):
+    """ given a sequence of (word, count) pairs return the one with the most
+    counts """
+
+    # add each word count pair to a counter dict obj
+    word_counts = Counter()
+    for word, count in words_and_counts:
+        word_counts[word] += count
+
+    # get the most common word and count tuple
+    word, count = word_counts.most_common(1)[0]
+
+    yield (user, (word, count))
+
+# now we can call map_reduce general implementation on all status updates
+user_words = map_reduce(status_updates, words_per_user_mapper, 
+                        most_popular_word_reducer)
+
+print user_words
+
+# or we could find the number of distinct status likers for each user
+def liker_mapper(status_update):
+    """ yields (user, (liker_of_user, 1)) each time a liker likes a
+    status update """
+    user = status_update['username']
+    likers = status_update['liked_by']
+    for liker in likers:
+        yield (user, liker)
+
+distinct_likers_per_user = map_reduce(status_updates, liker_mapper,
+                                      count_distinct_reducer)
+
+# Example: Matrix Multiplication #
+##################################
+"""
+For large sparse matrices a more effecient storage method (rather than list
+of list or numpy arrays) is to have a list of tuples (name, i, j, value)
+where i,j is a matrix location with a non-zero value. In this representation
+we can use mapRedeuce to compute matrix multiplication.
+""" 
+def matrix_multiply_mapper(m, element):
+    """ 'm' is the common dim. (cols of A, rows of B in A*B) element is a
+    tuple (matrix_name, i, j, value). """
+    name, i, j, value = element
+
+    if name == 'A':
+        # A_ij is the jth entry in the sum for each C_ik, k=1,2,3...m
+        for k in range(m):
+            # group the entries for C_ik
+            yield((i,k), (j,value))
+
+    else:
+        # B_ij is the i-th entry in the sum for each Ckj
+        for k in range(m):
+            # group with other entries for C_kj
+            yield((k,j), (i,value))
+
+def matrix_multiply_reducer(m, key, indexed_values):
+    results_by_index = defaultdict(list)
+    for index, value in indexed_values:
+        results_by_index[index].append(value)
