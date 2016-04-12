@@ -9,7 +9,7 @@ from collections import defaultdict
 from collections import Counter
 from functools import partial
 from datetime import datetime
-from DS_Scratch.Ch13_Naive_Bayes import tokenize
+from DS_Scratch.Ch13_Naive_Bayes.spam_classifier import tokenize
 import re
 
 """ A basic starting example with mapReduce is to count words in documents.
@@ -169,7 +169,7 @@ def words_per_user_mapper(status_update):
     # choice we could have looked for the most popular word among all the
     # words from every update.
     user = status_update['username']
-    for word in tokenize(status_update['text'])
+    for word in tokenize(status_update['text']):
         yield (user, (word, 1))
 
 def most_popular_word_reducer(user, words_and_counts):
@@ -216,7 +216,12 @@ def matrix_multiply_mapper(m, element):
     """ 'm' is the common dim. (cols of A, rows of B in A*B) element is a
     tuple (matrix_name, i, j, value). """
     name, i, j, value = element
-
+    
+    """ When doing matrix multiplication A*B we take the ith row of a and
+    go over the k-columns times the jth col of B over the k-rows of B so we
+    are going to use (i.k) as the keys for A and (k,j) as the keys for B.
+    The values will be the i or j and the value at that location. """    
+    
     if name == 'A':
         # A_ij is the jth entry in the sum for each C_ik, k=1,2,3...m
         for k in range(m):
@@ -230,6 +235,24 @@ def matrix_multiply_mapper(m, element):
             yield((k,j), (i,value))
 
 def matrix_multiply_reducer(m, key, indexed_values):
+    # make a dict to hold our key,values
     results_by_index = defaultdict(list)
     for index, value in indexed_values:
         results_by_index[index].append(value)
+
+    # sum up the products of the (position,value) values
+    sum_product = sum(results[0] * results[1] 
+                      for results in results_by_index.values()
+                      if len(results) == 2)
+
+    if sum_product != 0.0:
+        yield (key, sum_product)
+
+# test multiply #
+#################
+entries = [('A',0,0,3), ('A',0,1, 2), ('B',0,0,4),('B',0,1,-1),('B',1,0,10)]
+# set the common dim as 3
+mapper = partial(matrix_multiply_mapper,3)
+reducer = partial(matrix_multiply_reducer,3)
+
+print map_reduce(entries, mapper, reducer)
